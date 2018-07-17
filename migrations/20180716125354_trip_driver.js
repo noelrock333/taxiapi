@@ -19,6 +19,7 @@ exports.up = function(knex, Promise) {
           t.integer('rate').defaultTo(0);
           t.integer('user_id').unsigned().notNullable();
           t.integer('vehicle_id').unsigned()
+
           t.unique('license_number');
 
           t.foreign('user_id').references('id').inTable('users');

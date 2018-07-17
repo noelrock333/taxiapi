@@ -6,28 +6,40 @@ const authToken = require('../lib/auth-token');
 const helpers = require('../lib/helpers');
 const User = require('../models/user');
 const Driver = require('../models/driver');
+const driverValidation = require('../validations/models/driver');
 
-router.post('/signup', function(req, res, next) {
-  var password_hash = SHA256(req.body.password).toString();
-
+router.post('/signup', driverValidation.validate, function(req, res, next) {
+  let {full_name, email, password, license_number} = req.body;
+  let password_hash = SHA256(password).toString();
 
   new User({
-    full_name: req.body.full_name,
-    email: req.body.email,
-    password_hash: password_hash
+    full_name,
+    email,
+    password_hash
   })
   .save()
   .then(user => {
     let user_id = user.get('id');
-    if (user_id) {
-      new Driver({
-
-      })
+    if (user_id)
+      return new Driver({ license_number, user_id }).save();
+    else
+      res.status(422).json({error: 'No se pudo crear el driver'});
+  })
+  .then(driver => {
+    let driver_id = driver.get('id');
+    if (driver_id) {
+      driver.fetch({withRelated: 'user'}).then((data)=> {
+        res.status(201).json(data.toJSON());
+      });
     }
     else {
-      res.json()
+      new User({id: user_id})
+        .destroy()
+        .then(user => {
+          res.status(422).json({error: 'No se pudo crear el driver'});
+        })
     }
-  })
+  });
 });
 
 module.exports = router;
