@@ -23,7 +23,7 @@ router.post('/signup', driverValidation.validate, function(req, res, next) {
     if (user_id)
       return new Driver({ license_number, user_id }).save();
     else
-      res.status(422).json({error: 'No se pudo crear el driver'});
+      res.status(422).json({errors: {message: 'No se pudo crear el conductor'}});
   })
   .then(driver => {
     let driver_id = driver.get('id');
@@ -36,7 +36,7 @@ router.post('/signup', driverValidation.validate, function(req, res, next) {
       new User({id: user_id})
         .destroy()
         .then(user => {
-          res.status(422).json({error: 'No se pudo crear el driver'});
+          res.status(422).json({errors: {message: 'No se pudo crear el conductor'}});
         })
     }
   });
