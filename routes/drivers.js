@@ -8,38 +8,26 @@ const User = require('../models/user');
 const Driver = require('../models/driver');
 const driverValidation = require('../validations/models/driver');
 
-router.post('/signup', driverValidation.validate, function(req, res, next) {
-  let {full_name, email, password, license_number} = req.body;
+router.post('/signup', driverValidation.validate, async (req, res, next) => {
+  const {full_name, email, password, license_number, status = 'free' } = req.body;
   let password_hash = SHA256(password).toString();
 
-  new User({
-    full_name,
-    email,
-    password_hash
-  })
-  .save()
-  .then(user => {
-    let user_id = user.get('id');
-    if (user_id)
-      return new Driver({ license_number, user_id }).save();
-    else
+  let user = await new User({ full_name, email, password_hash }).save();
+  let user_id = user.get('id');
+  if (user_id) {
+    let driver = await new Driver({ license_number, status, user_id }).save();
+    driver_id = driver.get('id');
+    if (driver_id){
+      driver = await driver.fetch({withRelated: 'user'})
+      res.status(201).json(driver.toJSON());
+    }
+    else{
+      user = await new User({id: user_id}).destroy();
       res.status(422).json({errors: {message: 'No se pudo crear el conductor'}});
-  })
-  .then(driver => {
-    let driver_id = driver.get('id');
-    if (driver_id) {
-      driver.fetch({withRelated: 'user'}).then((data)=> {
-        res.status(201).json(data.toJSON());
-      });
     }
-    else {
-      new User({id: user_id})
-        .destroy()
-        .then(user => {
-          res.status(422).json({errors: {message: 'No se pudo crear el conductor'}});
-        })
-    }
-  });
+  }
+  else
+    res.status(422).json({errors: {message: 'No se pudo crear el conductor'}});
 });
 
 module.exports = router;

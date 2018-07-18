@@ -20,6 +20,12 @@ function validateDriver(attributes) {
       uniqueness: {
         table: 'drivers'
       }
+    },
+    status: {
+      inclusion: [
+        "free",
+        "busy"
+      ]
     }
   };
 
