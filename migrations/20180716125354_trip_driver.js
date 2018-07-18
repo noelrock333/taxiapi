@@ -37,18 +37,18 @@ exports.up = function(knex, Promise) {
         })
         .createTable('trips', function (t) {
           t.increments('id').primary();
-          t.enu('status', ['holding','active','finished']).defaultTo('active');
-          t.text('address_origin');
-          t.string('lat_origin');
-          t.string('lng_origin');
+          t.enu('status', ['holding','taken','active','finished']).defaultTo('holding');
+          t.text('address_origin').notNullable();;
+          t.string('lat_origin').notNullable();;
+          t.string('lng_origin').notNullable();;
           t.text('address_destination');
           t.string('lat_destination');
           t.string('lng_destination');
           t.integer('rate').defaultTo(0);
           t.text('comment');
           t.integer('user_id').unsigned().notNullable();
-          t.integer('driver_id').unsigned().notNullable();
-          t.integer('vehicle_id').unsigned().notNullable();
+          t.integer('driver_id').unsigned();
+          t.integer('vehicle_id').unsigned();
 
           t.foreign('user_id').references('id').inTable('users');
           t.foreign('driver_id').references('id').inTable('drivers');

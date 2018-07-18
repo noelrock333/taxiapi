@@ -1,6 +1,6 @@
 const validate = require('../../lib/validate');
 
-function validateVehicle(attributes) {
+function validateServiceType(attributes) {
   let constraints = {
     name: {
       presence: {allowEmpty: false},
@@ -15,6 +15,6 @@ function validateVehicle(attributes) {
 
 module.exports = {
   validate: (req, res, next) => {
-    return validateVehicle(req.body).then(() => next(), err => res.status(422).json({errors: err}))
+    return validateServiceType(req.body).then(() => next(), err => res.status(422).json({errors: err}))
   }
 }
