@@ -9,9 +9,9 @@ const vehicleValidation = require('../validations/models/vehicle');
 
 
 router.post('/', vehicleValidation.validate, async (req, res, next) => {
-  let {organization, license_plate, number, model, year} = req.body;
+  let {organization, license_plate, number, model, year, service_type_id} = req.body;
   const vehicle = await new Vehicle({
-    organization, license_plate, number, model, year
+    organization, license_plate, number, model, year, service_type_id
   }).save();
   let vehicle_id = vehicle.get('id');
   if (vehicle_id)
@@ -28,11 +28,11 @@ router.get('/:id', async (req, res, next) => {
 
 router.put('/:id', vehicleValidation.validate, async (req, res, next) => {
   const id = req.params.id;
-  let {organization, license_plate, number, model, year} = req.body;
+  let {organization, license_plate, number, model, year, service_type_id} = req.body;
   let vehicle = await new Vehicle({id}).fetch();
   if (vehicle){
     vehicle = await vehicle
-      .save({organization, license_plate, number, model, year}, { patch: true });
+      .save({organization, license_plate, number, model, year, service_type_id}, { patch: true });
     res.status(201).json(vehicle.toJSON());
   }
   else

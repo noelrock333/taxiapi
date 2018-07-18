@@ -12,6 +12,7 @@ var usersRouter = require('./routes/users');
 var tripRouter = require('./routes/trip');
 var driversRouter = require('./routes/drivers');
 var vehiclesRouter = require('./routes/vehicles');
+var serviceTypesRouter = require('./routes/service_types');
 
 var app = express();
 var server = require('http').Server(app);
@@ -36,6 +37,7 @@ app.use('/users', usersRouter);
 app.use('/trip', tripRouter);
 app.use('/drivers', driversRouter);
 app.use('/vehicles', vehiclesRouter);
+app.use('/service_types', serviceTypesRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

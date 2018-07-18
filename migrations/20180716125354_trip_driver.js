@@ -1,6 +1,12 @@
 
 exports.up = function(knex, Promise) {
   return knex.schema
+        .createTable('service_types', function(t) {
+          t.increments('id').primary();
+          t.string('name').notNullable();
+
+          t.timestamps();
+        })
         .createTable('vehicles', function (t) {
           t.increments('id').primary();
           t.string('organization').notNullable();
@@ -8,8 +14,10 @@ exports.up = function(knex, Promise) {
           t.string('number').notNullable();
           t.string('model').notNullable();
           t.string('year').notNullable();
-          t.unique('license_plate')
+          t.integer('service_type_id').unsigned().notNullable();
 
+          t.foreign('service_type_id').references('id').inTable('service_types');
+          t.unique('license_plate');
           t.timestamps();
         })
         .createTable('drivers', function (t) {
@@ -54,5 +62,6 @@ exports.down = function(knex, Promise) {
   return knex.schema
     .dropTableIfExists('trips')
     .dropTableIfExists('drivers')
-    .dropTableIfExists('vehicles');
+    .dropTableIfExists('vehicles')
+    .dropTableIfExists('service_types');
 };
