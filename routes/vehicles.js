@@ -8,14 +8,21 @@ const Vehicle = require('../models/vehicle');
 const vehicleValidation = require('../validations/models/vehicle');
 
 
+router.get('/', async (req, res, next) => {
+  const vehicles = await new Vehicle().fetchAll({withRelated: 'service_type'});
+  res.status(200).json(vehicles.toJSON());
+});
+
 router.post('/', vehicleValidation.validate, async (req, res, next) => {
   let {organization, license_plate, number, model, year, service_type_id} = req.body;
-  const vehicle = await new Vehicle({
+  let vehicle = await new Vehicle({
     organization, license_plate, number, model, year, service_type_id
   }).save();
   let vehicle_id = vehicle.get('id');
-  if (vehicle_id)
+  if (vehicle_id){
+    vehicle = await vehicle.fetch({withRelated: 'service_type'});
     res.status(201).json(vehicle.toJSON());
+  }
   else
     res.status(422).json({errors: {message: 'No se pudo crear el vehiculo'}});
 });

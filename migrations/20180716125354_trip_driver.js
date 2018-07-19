@@ -26,7 +26,7 @@ exports.up = function(knex, Promise) {
           t.enu('status', ['free','busy']).defaultTo('free');
           t.integer('rate').defaultTo(0);
           t.integer('user_id').unsigned().notNullable();
-          t.integer('vehicle_id').unsigned()
+          t.integer('vehicle_id').unsigned();
 
           t.unique('license_number');
 
