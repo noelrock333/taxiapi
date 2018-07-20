@@ -29,7 +29,7 @@ router.post('/', vehicleValidation.validate, async (req, res, next) => {
 
 router.get('/:id', async (req, res, next) => {
   let id = req.params.id;
-  let vehicle = await new Vehicle({id}).fetch();
+  let vehicle = await new Vehicle({id}).fetch({withRelated: 'service_type'});
   res.status(200).json(vehicle ? vehicle.toJSON() : { errors: { message: 'No se pudo encontrar el vehiculo' }});
 });
 

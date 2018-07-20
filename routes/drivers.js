@@ -14,8 +14,9 @@ router.get('/', async (req, res, next) => {
   res.status(200).json(drivers.toJSON());
 });
 
-router.put('/asign_vehicle', async (req, res, next) => {
-  let { vehicle_id, driver_id } = req.body;
+router.put('/asign_vehicle/:id', async (req, res, next) => {
+  let driver_id = req.params.id;
+  let { vehicle_id } = req.body;
   let vehicle = await new Vehicle({id: vehicle_id}).fetch();
   let driver = await new Driver({id: driver_id}).fetch();
   [vehicle_id, driver_id] = [vehicle.get('id'), driver.get('id')];

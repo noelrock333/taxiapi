@@ -3,6 +3,7 @@ const router = express.Router();
 const knex = require('../knex');
 const SHA256 = require('crypto-js/sha256');
 const authToken = require('../lib/auth-token');
+const User = require('../models/user');
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -51,5 +52,11 @@ router.post('/login', function(req, res, next) {
       }
     });
 })
+
+router.get('/active_trip/', async (req, res, next) => {
+  let id = req.params.id;
+  let user = new User({id}).trips.fetch();
+  console.log(user.toJSON());
+});
 
 module.exports = router;
