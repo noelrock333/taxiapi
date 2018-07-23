@@ -1,5 +1,4 @@
-const knex = require('../knex');
-const bookshelf = require('bookshelf')(knex);
+const bookshelf = require('../bookshelf');
 
 var User = bookshelf.Model.extend({
   hasTimestamps: true,
