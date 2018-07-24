@@ -14,7 +14,7 @@ router.get('/', async(req, res, next) => {
 
 router.post('/signup', async (req, res, next) => {
   let { email, password, full_name } = req.body;
-  var password_hash = SHA256(password).toString();
+  var password_hash = SHA256(`${password}`).toString();
   let user = await new User({ email, password_hash, full_name}).save();
   if (user)
     res.status(201).json(user.toJSON());
@@ -26,27 +26,31 @@ router.get('/login', function(req, res, next) {
   res.render('users/login');
 });
 
-router.post('/login', function(req, res, next) {
-  knex('users')
-    .where('email', '=', req.body.email)
-    .first()
-    .then(function(data) {
-      if (data) {
-        var password_hash = SHA256(req.body.password).toString();
-        if (password_hash == data.password_hash) {
-          var token = authToken.encode({
-            email: data.email,
-            user_id: data.id
-          });
-          res.json({ jwt: token });
-        } else {
-          res.send('Password incorrecto');
-        }
-      } else {
-        return res.status(401);
-      }
-    });
-})
+router.post('/login', async (req, res, next) => {
+  const { email, password } = req.body;
+  console.log(email);
+  console.log(password);
+  let user = await new User({email}).fetch();
+  if (user){
+    const password_hash = SHA256(`${password}`).toString();
+    user = user.toJSON();
+    console.log(user.password_hash)
+    console.log(password_hash)
+    if (user.password_hash === password_hash){
+      const token = authToken.encode({
+        email: user.email,
+        user_id: user.id
+      });
+      res.status(200).json({ jwt: token });
+    }
+    else {
+      res.status(422).json({errors: {message: 'El usuario o la contraseña son incorrectos'}});
+    }
+  }
+  else {
+    res.status(422).json({errors: {message: 'El usuario o la contraseña son incorrectos'}});
+  }
+});
 
 router.get('/:id/active_trip', async (req, res, next) => {
   let user_id = req.params.id;
