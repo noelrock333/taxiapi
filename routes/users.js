@@ -28,14 +28,10 @@ router.get('/login', function(req, res, next) {
 
 router.post('/login', async (req, res, next) => {
   const { email, password } = req.body;
-  console.log(email);
-  console.log(password);
   let user = await new User({email}).fetch();
   if (user){
     const password_hash = SHA256(`${password}`).toString();
     user = user.toJSON();
-    console.log(user.password_hash)
-    console.log(password_hash)
     if (user.password_hash === password_hash){
       const token = authToken.encode({
         email: user.email,
