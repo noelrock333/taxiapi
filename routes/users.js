@@ -28,6 +28,8 @@ router.get('/login', function(req, res, next) {
 
 router.post('/login', async (req, res, next) => {
   const { email, password } = req.body;
+  console.log('email: ', email);
+  console.log('password: ', password);
   let user = await new User({email}).fetch();
   if (user){
     const password_hash = SHA256(`${password}`).toString();
