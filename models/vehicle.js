@@ -1,8 +1,7 @@
-const knex = require('../knex');
-const bookshelf = require('bookshelf')(knex);
+const bookshelf = require('../bookshelf');
 const ServiceType = require('./service_type');
 
-var Vehicle = bookshelf.Model.extend({
+const Vehicle = bookshelf.Model.extend({
   hasTimestamps: true,
   tableName: 'vehicles',
   service_type: function(){
