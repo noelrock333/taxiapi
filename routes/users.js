@@ -6,25 +6,20 @@ const authToken = require('../lib/auth-token');
 const User = require('../models/user');
 
 /* GET users listing. */
-router.get('/', function(req, res, next) {
+router.get('/', async(req, res, next) => {
   res.io.emit("socketToMe", "users");
-  res.render('users');
+  let users = await new User().fetchAll();
+  res.status(200).json(users.toJSON());
 });
 
-router.get('/signin', function(req, res, next) {
-  res.render('users/signin');
-});
-
-router.post('/signin', function(req, res, next) {
-  var password_hash = SHA256(req.body.password).toString();
-  knex('users')
-    .insert({
-      full_name: req.body.full_name,
-      email: req.body.email,
-      password_hash: password_hash
-    }).then(function(data) {
-      res.send('El usuario ha sido creado');
-    });
+router.post('/signup', async (req, res, next) => {
+  let { email, password, full_name } = req.body;
+  var password_hash = SHA256(password).toString();
+  let user = await new User({ email, password_hash, full_name}).save();
+  if (user)
+    res.status(201).json(user.toJSON());
+  else
+    res.status(422).json({errors: {message: 'No se pudo crear el Usuario'}})
 });
 
 router.get('/login', function(req, res, next) {
