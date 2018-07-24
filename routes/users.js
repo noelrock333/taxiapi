@@ -19,7 +19,7 @@ router.post('/signup', async (req, res, next) => {
   if (user)
     res.status(201).json(user.toJSON());
   else
-    res.status(422).json()
+    res.status(422).json({errors: {message: 'No se pudo crear el Usuario'}})
 });
 
 router.get('/login', function(req, res, next) {
