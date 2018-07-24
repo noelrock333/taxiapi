@@ -13,8 +13,7 @@ router.get('/', async (req, res, next) => {
 router.post('/', serviceTypeValidation.validate, async (req, res, next) => {
   let name = req.body.name.toLowerCase();
   let service = await new ServiceType({ name }).save();
-  let service_id = service.get('id');
-  if (service_id)
+  if (service)
     res.status(201).json(service.toJSON());
   else
     res.status(422).json({errors: {message: 'No se pudo crear el servicio'}});
@@ -25,8 +24,7 @@ router.delete('/:id', async (req, res, next) => {
   let service = await new ServiceType({id}).fetch();
   if (service){
     service = await service.destroy();
-    let service_id = service.get('id');
-    if (typeof service_id === 'undefined')
+    if (service && typeof service.get('id') === 'undefined')
       res.status(200).json({flash: {message: 'Servicio elimnado con exito'}});
     else
       res.status(422).json({errors: {message: 'No se pudo eliminar el servicio'}});

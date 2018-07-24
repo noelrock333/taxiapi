@@ -53,10 +53,29 @@ router.post('/login', function(req, res, next) {
     });
 })
 
-router.get('/active_trip/', async (req, res, next) => {
-  let id = req.params.id;
-  let user = new User({id}).trips.fetch();
-  console.log(user.toJSON());
+router.get('/:id/active_trip', async (req, res, next) => {
+  let user_id = req.params.id;
+  let user = await new User({id: user_id}).fetch();
+  if (user) {
+    let trip = await user.activeTrip();
+    if (trip)
+      res.status(200).json({active: true, trip: trip.toJSON()});
+    else
+      res.status(200).json({active: false});
+  }
+  else
+    res.status(200).json({errors: {message: 'No se pudo encontrar un usuario'}});
+});
+
+router.get('/:id/missing_rates', async (req, res, next) => {
+  let user_id = req.params.id;
+  let user = await new User({id: user_id}).fetch();
+  if (user) {
+    let trips = await user.missingRates();
+    res.status(200).json(trips.toJSON());
+  }
+  else
+    res.status(200).json({errors: {message: 'No se pudo encontrar un usuario'}});
 });
 
 module.exports = router;

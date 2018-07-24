@@ -14,14 +14,32 @@ router.get('/', async (req, res, next) => {
   res.status(200).json(drivers.toJSON());
 });
 
-router.put('/asign_vehicle/:id', async (req, res, next) => {
+router.get('/:id/active_trip', async (req, res, next) => {
+  let driver_id = req.params.id;
+  let driver = await new Driver({id: driver_id}).fetch();
+  if (driver) {
+    let trip = await driver.activeTrip();
+    if (trip)
+      res.status(200).json({active: true, trip: trip.toJSON()});
+    else
+      res.status(200).json({active: false});
+  }
+  else
+    res.status(200).json({errors: {message: 'No se pudo encontrar al Conductor'}});
+});
+
+router.put('/:id/asign_vehicle', async (req, res, next) => {
   let driver_id = req.params.id;
   let { vehicle_id } = req.body;
   let vehicle = await new Vehicle({id: vehicle_id}).fetch();
   let driver = await new Driver({id: driver_id}).fetch();
-  [vehicle_id, driver_id] = [vehicle.get('id'), driver.get('id')];
-  if (vehicle_id && driver_id) {
+  if (vehicle && driver && vehicle.toJSON().status == 'not_asigned') {
+    if (driver.toJSON().vehicle_id){
+      let old_vehicle = await new Vehicle({id: driver.toJSON().vehicle_id}).fetch();
+      old_vehicle = await old_vehicle.save({status: 'not_asigned'}, {patch: true});
+    }
     driver = await driver.save({vehicle_id}, {patch: true});
+    vehicle = await vehicle.save({status: 'asigned'}, {patch: true});
     if (driver.toJSON().vehicle_id == vehicle_id){
       driver = await driver.fetch({withRelated: ['vehicle', 'user']});
       res.status(200).json(driver.toJSON());
@@ -30,7 +48,27 @@ router.put('/asign_vehicle/:id', async (req, res, next) => {
       res.status(200).json({errors: {message: 'No se pudo actualizar el Conductor'}});
   }
   else
-    res.status(200).json({errors: {message: 'No se pudo encontrar el condutor o el vehiculo'}});
+    res.status(200).json({errors: {message: 'No se pudo encontrar el Conductor o el vehiculo ya esta asigando'}});
+});
+
+router.put('/:id/quit_vehicle', async (req, res, next) => {
+  let driver_id = req.params.id;
+  let driver = await new Driver({id: driver_id}).fetch();
+  if (driver) {
+    if (driver.toJSON().vehicle_id){
+      let old_vehicle = await new Vehicle({id: driver.toJSON().vehicle_id}).fetch();
+      old_vehicle = await old_vehicle.save({status: 'not_asigned'}, {patch: true});
+    }
+    driver = await driver.save({vehicle_id: null}, {patch: true});
+    if (driver.toJSON().vehicle_id == null){
+      driver = await driver.fetch({withRelated: ['user']});
+      res.status(200).json(driver.toJSON());
+    }
+    else
+      res.status(200).json({errors: {message: 'No se pudo actualizar el Conductor'}});
+  }
+  else
+    res.status(200).json({errors: {message: 'No se pudo encontrar el Conductor'}});
 });
 
 router.post('/signup', driverValidation.validate, async (req, res, next) => {
@@ -38,11 +76,10 @@ router.post('/signup', driverValidation.validate, async (req, res, next) => {
   let password_hash = SHA256(password).toString();
 
   let user = await new User({ full_name, email, password_hash }).save();
-  let user_id = user.get('id');
-  if (user_id) {
+  if (user) {
+    let user_id = user.get('id');
     let driver = await new Driver({ license_number, status, user_id }).save();
-    driver_id = driver.get('id');
-    if (driver_id){
+    if (driver){
       driver = await driver.fetch({withRelated: 'user'});
       res.status(201).json(driver.toJSON());
     }

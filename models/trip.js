@@ -1,18 +1,18 @@
 const bookshelf = require('../bookshelf');
-const User = require('./user');
-const Driver = require('./driver');
-const Vehicle = require('./vehicle');
 
-var Trip = bookshelf.Model.extend({
+const Trip = bookshelf.Model.extend({
   hasTimestamps: true,
   tableName: 'trips',
   user: function(){
+    const User = require('./user');
     return this.belongsTo(User)
   },
   driver: function(){
+    const Driver = require('./driver');
     return this.belongsTo(Driver)
   },
   vehicle: function(){
+    const Vehicle = require('./vehicle');
     return this.belongsTo(Vehicle)
   }
 });

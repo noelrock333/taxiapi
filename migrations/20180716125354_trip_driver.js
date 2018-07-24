@@ -14,6 +14,7 @@ exports.up = function(knex, Promise) {
           t.string('number').notNullable();
           t.string('model').notNullable();
           t.string('year').notNullable();
+          t.enu('status', ['not_asigned','asigned']).defaultTo('not_asigned');
           t.integer('service_type_id').unsigned().notNullable();
 
           t.foreign('service_type_id').references('id').inTable('service_types');
@@ -37,7 +38,7 @@ exports.up = function(knex, Promise) {
         })
         .createTable('trips', function (t) {
           t.increments('id').primary();
-          t.enu('status', ['holding','taken','active','finished', 'cancelled']).defaultTo('holding');
+          t.enu('status', ['holding','taken','active','finished', 'canceled']).defaultTo('holding');
           t.text('address_origin').notNullable();;
           t.string('lat_origin').notNullable();;
           t.string('lng_origin').notNullable();;
