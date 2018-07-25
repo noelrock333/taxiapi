@@ -54,6 +54,7 @@ router.put('/:id/accept_trip', async (req, res, next) => {
   let trip = await new Trip({id: trip_id}).fetch();
   let driver = await new Driver({id: driver_id}).fetch();
   if (trip && driver && (driver.toJSON().vehicle_id) && (trip.toJSON().status == 'holding')) {
+    const vehicle_id = driver.toJSON().vehicle_id;
     trip = await trip.save({ status: 'taken', driver_id, vehicle_id}, {patch: true});
     if (trip.toJSON().vehicle_id == vehicle_id){
       driver = await driver.save({status: 'busy'}, {patch: true});
