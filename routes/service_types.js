@@ -16,7 +16,7 @@ router.post('/', serviceTypeValidation.validate, async (req, res, next) => {
   if (service)
     res.status(201).json(service.toJSON());
   else
-    res.status(422).json({errors: {message: 'No se pudo crear el servicio'}});
+    res.status(422).json({errors: {message: 'No se pudo crear el Servicio'}});
 });
 
 router.delete('/:id', async (req, res, next) => {
