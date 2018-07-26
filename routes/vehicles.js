@@ -22,13 +22,16 @@ router.post('/', vehicleValidation.validate, async (req, res, next) => {
     res.status(201).json(vehicle.toJSON());
   }
   else
-    res.status(422).json({errors: {message: 'No se pudo crear el vehiculo'}});
+    res.status(422).json({errors: {message: 'No se pudo crear el Vehículo'}});
 });
 
 router.get('/:id', async (req, res, next) => {
   let id = req.params.id;
   let vehicle = await new Vehicle({id}).fetch({withRelated: 'service_type'});
-  res.status(200).json(vehicle ? vehicle.toJSON() : { errors: { message: 'No se pudo encontrar el vehiculo' }});
+  if (vehicle)
+    res.status(200).json(vehicle.toJSON());
+  else
+    res.status(404).json({ errors: { message: 'No se pudo encontrar el Vehículo' }});
 });
 
 router.put('/:id', vehicleValidation.validate, async (req, res, next) => {
@@ -38,10 +41,10 @@ router.put('/:id', vehicleValidation.validate, async (req, res, next) => {
   if (vehicle){
     vehicle = await vehicle
       .save({organization, license_plate, number, model, year, service_type_id}, { patch: true });
-    res.status(201).json(vehicle.toJSON());
+    res.status(200).json(vehicle.toJSON());
   }
   else
-    res.status(200).json({errors: {message: 'No se pudo encontrar el vehiculo para actualizar'}});
+    res.status(404).json({errors: {message: 'No se pudo encontrar el Vehículo para actualizar'}});
 });
 
 router.delete('/:id', async (req, res, next) => {
@@ -50,12 +53,12 @@ router.delete('/:id', async (req, res, next) => {
   if (vehicle){
     vehicle = await vehicle.destroy();
     if (vehicle && (typeof vehicle.get('id') === 'undefined'))
-      res.status(200).json({flash: {message: 'Vehiculo elimnado con exito'}});
+      res.status(200).json({flash: {message: 'Vehículo elimnado con éxito'}});
     else
-      res.status(422).json({errors: {message: 'No se pudo eliminar el vehiculo'}});
+      res.status(422).json({errors: {message: 'No se pudo eliminar el Vehículo'}});
   }
   else
-    res.status(422).json({errors: {message: 'No se pudo encontrar el vehiculo'}});
+    res.status(404).json({errors: {message: 'No se pudo encontrar el Vehículo'}});
 });
 
 module.exports = router;
