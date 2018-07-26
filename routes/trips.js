@@ -42,6 +42,12 @@ router.post('/',validateTrip.validate, async (req, res, next) => {
     res.status(422).json({errors: {message: 'No se pudo crear el viaje'}});
 });
 
+router.post("/trips_in_range", async (req, res, next) => {
+  let {lat, lng} = req.body;
+  let trips = await new Trip().tripsInRange(lat,lng);
+  res.status(200).json(trips);
+});
+
 router.get('/:id', async (req, res, next) => {
   const id = req.params.id;
   let trip = await new Trip({id}).fetch({withRelated: ['user', 'driver.user','vehicle']});

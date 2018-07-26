@@ -10,7 +10,7 @@ var cors = require('cors');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-var tripRouter = require('./routes/trip');
+var tripRouter = require('./routes/trips');
 var driversRouter = require('./routes/drivers');
 var vehiclesRouter = require('./routes/vehicles');
 var serviceTypesRouter = require('./routes/service_types');
