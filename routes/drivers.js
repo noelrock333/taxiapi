@@ -25,7 +25,7 @@ router.get('/:id/active_trip', async (req, res, next) => {
       res.status(200).json({active: false});
   }
   else
-    res.status(200).json({errors: {message: 'No se pudo encontrar al Conductor'}});
+    res.status(404).json({errors: {message: 'No se pudo encontrar al Conductor'}});
 });
 
 router.put('/:id/asign_vehicle', async (req, res, next) => {
@@ -45,10 +45,10 @@ router.put('/:id/asign_vehicle', async (req, res, next) => {
       res.status(200).json(driver.toJSON());
     }
     else
-      res.status(200).json({errors: {message: 'No se pudo actualizar el Conductor'}});
+      res.status(422).json({errors: {message: 'No se pudo actualizar el Conductor'}});
   }
   else
-    res.status(200).json({errors: {message: 'No se pudo encontrar el Conductor o el vehiculo ya esta asigando'}});
+    res.status(422).json({errors: {message: 'No se pudo encontrar el Conductor o el Vehículo ya esta asigando'}});
 });
 
 router.put('/:id/quit_vehicle', async (req, res, next) => {
@@ -61,14 +61,14 @@ router.put('/:id/quit_vehicle', async (req, res, next) => {
     }
     driver = await driver.save({vehicle_id: null}, {patch: true});
     if (driver.toJSON().vehicle_id == null){
-      driver = await driver.fetch({withRelated: ['user']});
+      driver = await driver.fetch({withRelated: ['vehicle', 'user']});
       res.status(200).json(driver.toJSON());
     }
     else
-      res.status(200).json({errors: {message: 'No se pudo actualizar el Conductor'}});
+      res.status(422).json({errors: {message: 'No se pudo actualizar el Conductor'}});
   }
   else
-    res.status(200).json({errors: {message: 'No se pudo encontrar el Conductor'}});
+    res.status(404).json({errors: {message: 'No se pudo encontrar el Conductor'}});
 });
 
 router.post('/signup', driverValidation.validate, async (req, res, next) => {
@@ -80,7 +80,7 @@ router.post('/signup', driverValidation.validate, async (req, res, next) => {
     let user_id = user.get('id');
     let driver = await new Driver({ license_number, status, user_id }).save();
     if (driver){
-      driver = await driver.fetch({withRelated: 'user'});
+      driver = await driver.fetch({withRelated: ['vehicle', 'user']});
       res.status(201).json(driver.toJSON());
     }
     else{

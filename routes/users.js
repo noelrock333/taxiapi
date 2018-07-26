@@ -22,10 +22,6 @@ router.post('/signup', async (req, res, next) => {
     res.status(422).json({errors: {message: 'No se pudo crear el Usuario'}})
 });
 
-router.get('/login', function(req, res, next) {
-  res.render('users/login');
-});
-
 router.post('/login', async (req, res, next) => {
   const { email, password } = req.body;
   let user = await new User({email}).fetch();
@@ -40,11 +36,11 @@ router.post('/login', async (req, res, next) => {
       res.status(200).json({ jwt: token });
     }
     else {
-      res.status(422).json({errors: {message: 'El usuario o la contraseña son incorrectos'}});
+      res.status(422).json({errors: {message: 'El email o la contraseña son incorrectos'}});
     }
   }
   else {
-    res.status(422).json({errors: {message: 'El usuario o la contraseña son incorrectos'}});
+    res.status(422).json({errors: {message: 'El email o la contraseña son incorrectos'}});
   }
 });
 
@@ -59,7 +55,7 @@ router.get('/:id/active_trip', async (req, res, next) => {
       res.status(200).json({active: false});
   }
   else
-    res.status(200).json({errors: {message: 'No se pudo encontrar un usuario'}});
+    res.status(404).json({errors: {message: 'No se pudo encontrar un usuario'}});
 });
 
 router.get('/:id/missing_rates', async (req, res, next) => {
@@ -70,7 +66,7 @@ router.get('/:id/missing_rates', async (req, res, next) => {
     res.status(200).json(trips.toJSON());
   }
   else
-    res.status(200).json({errors: {message: 'No se pudo encontrar un usuario'}});
+    res.status(404).json({errors: {message: 'No se pudo encontrar un usuario'}});
 });
 
 module.exports = router;

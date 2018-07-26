@@ -8,7 +8,7 @@ const User = require('../models/user');
 const validateTrip = require('../validations/models/trip');
 
 router.get('/', async (req, res, next) => {
-  const trips = await new Trip().fetchAll();
+  const trips = await new Trip().fetchAll({withRelated: ['user', 'driver.user','vehicle']});
   res.status(200).json(trips.toJSON());
 });
 
@@ -35,8 +35,8 @@ router.post('/',validateTrip.validate, async (req, res, next) => {
 
   if (trip){
     let trip_id = trip.get('id');
-    trip = await new Trip({id: trip_id}).fetch({withRelated: 'user'});
-    res.status(200).json(trip.toJSON());
+    trip = await new Trip({id: trip_id}).fetch({withRelated: ['user', 'driver.user','vehicle']});
+    res.status(201).json(trip.toJSON());
   }
   else
     res.status(422).json({errors: {message: 'No se pudo crear el viaje'}});
@@ -50,8 +50,13 @@ router.post("/trips_in_range", async (req, res, next) => {
 
 router.get('/:id', async (req, res, next) => {
   const id = req.params.id;
-  let trip = await new Trip({id}).fetch();
-  res.status(200).json(trip ? trip.toJSON() : {errors: {message: 'No se pudo encontrar ningun viaje'}});
+  let trip = await new Trip({id}).fetch({withRelated: ['user', 'driver.user','vehicle']});
+  if (trip) {
+    res.status(200).json(trip.toJSON());
+  }
+  else {
+    res.status(404).json({errors: {message: 'No se pudo encontrar ningun viaje'}});
+  }
 });
 
 router.put('/:id/accept_trip', async (req, res, next) => {
@@ -65,13 +70,13 @@ router.put('/:id/accept_trip', async (req, res, next) => {
     if (trip.toJSON().vehicle_id == vehicle_id){
       driver = await driver.save({status: 'busy'}, {patch: true});
       trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle']});
-      res.status(201).json(trip.toJSON());
+      res.status(200).json(trip.toJSON());
     }
     else
-      res.status(422).json({errors: {message: 'No se pudo actualizar el trip'}});
+      res.status(422).json({errors: {message: 'No se pudo actualizar el Viaje'}});
   }
   else
-    res.status(422).json({errors: {message: 'No se pudo encontrar el Viaje o el Conductor no tiene vehiculo asignado'}});
+    res.status(422).json({errors: {message: 'No se pudo encontrar el Viaje o el Conductor no tiene Vehículo asignado'}});
 });
 
 router.put('/:id/start_trip', async (req, res, next) => {
@@ -87,26 +92,25 @@ router.put('/:id/start_trip', async (req, res, next) => {
       res.status(422).json({errors: {message: 'No se pudo actualizar el Viaje'}});
   }
   else
-    res.status(200).json({errors: {message: 'No se pudo encontrar el Viaje'}});
+    res.status(404).json({errors: {message: 'No se pudo encontrar el Viaje'}});
 });
 
 router.put('/:id/finish_trip', async (req, res, next) => {
   let trip_id = req.params.id;
-  let { driver_id } = req.body;
   let trip = await new Trip({id: trip_id}).fetch();
-  let driver = await new Driver({id: driver_id}).fetch();
-  if (trip && driver && trip.toJSON().status === 'active') {
+  if (trip && trip.toJSON().status === 'active') {
     trip = await trip.save({status: 'finished'}, {patch: true});
     if (trip.toJSON().status == 'finished'){
+      let driver = await new Driver({id: trip.toJSON().driver_id}).fetch();
       driver = await driver.save({status: 'free'}, {patch: true});
       trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle']});
-      res.status(201).json(trip.toJSON());
+      res.status(200).json(trip.toJSON());
     }
     else
       res.status(422).json({errors: {message: 'No se pudo actualizar el status del Viaje'}})
   }
   else
-    res.status(422).json({errors: {message: 'No se pudo encontrar el Viaje o el Conductor no tiene vehiculo asignado'}});
+    res.status(422).json({errors: {message: 'No se pudo encontrar el Viaje o el Conductor no tiene Vehículo asignado'}});
 });
 
 router.put('/:id/set_rate', async (req, res, next) => {
@@ -117,13 +121,13 @@ router.put('/:id/set_rate', async (req, res, next) => {
     trip = await trip.save({comment, rate}, {patch: true});
     if (trip.toJSON().rate == rate){
       trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle']});
-      res.status(201).json(trip.toJSON());
+      res.status(200).json(trip.toJSON());
     }
     else
       res.status(422).json({errors: {message: 'No se pudo actualizar el rate del Viaje'}})
   }
   else
-    res.status(200).json({errors: {message: 'No se pudo encontrar el Viaje'}});
+    res.status(404).json({errors: {message: 'No se pudo encontrar el Viaje'}});
 });
 
 router.put('/:id/cancel_trip', async (req, res, next) => {
@@ -133,13 +137,13 @@ router.put('/:id/cancel_trip', async (req, res, next) => {
     trip = await trip.save({status: 'canceled'},{patch: true});
     if (trip.toJSON().status == 'canceled'){
       trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle']});
-      res.status(201).json(trip.toJSON());
+      res.status(200).json(trip.toJSON());
     }
     else
-      res.status(200).json({errors: {message: 'No se pudo actualizar el status del Viaje'}});
+      res.status(422).json({errors: {message: 'No se pudo actualizar el status del Viaje'}});
   }
   else
-    res.status(200).json({errors: {message: 'No se pudo encontrar el Viaje'}});
+    res.status(404).json({errors: {message: 'No se pudo encontrar el Viaje'}});
 });
 
 module.exports = router;

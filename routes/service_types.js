@@ -30,7 +30,7 @@ router.delete('/:id', async (req, res, next) => {
       res.status(422).json({errors: {message: 'No se pudo eliminar el servicio'}});
   }
   else
-    res.status(200).json({errors: {message: 'No se pudo encontrar el servicio para eliminar'}})
+    res.status(404).json({errors: {message: 'No se pudo encontrar el servicio para eliminar'}})
 })
 
 module.exports = router;
