@@ -12,14 +12,14 @@ router.get('/', async (req, res, next) => {
   res.status(200).json(trips.toJSON());
 });
 
-router.post('/',validateTrip.validate, async (req, res, next) => {
+router.post('/', helpers.requireAuthentication, validateTrip.validate, async (req, res, next) => {
   let {
     address_origin,
     lat_origin,
-    lng_origin,
-    user_id
+    lng_origin
   } = req.body;
 
+  let user_id = req.user.id;
   let user = await new User({id: user_id}).fetch();
   let user_trip = await user.activeTrip();
 
@@ -42,13 +42,13 @@ router.post('/',validateTrip.validate, async (req, res, next) => {
     res.status(422).json({errors: {message: 'No se pudo crear el viaje'}});
 });
 
-router.post("/trips_in_range", async (req, res, next) => {
+router.post("/trips_in_range", helpers.requireAuthentication, async (req, res, next) => {
   let {lat, lng} = req.body;
   let trips = await new Trip().tripsInRange(lat,lng);
   res.status(200).json(trips);
 });
 
-router.get('/:id', async (req, res, next) => {
+router.get('/:id', helpers.requireAuthentication, async (req, res, next) => {
   const id = req.params.id;
   let trip = await new Trip({id}).fetch({withRelated: ['user', 'driver.user','vehicle']});
   if (trip) {
@@ -59,9 +59,9 @@ router.get('/:id', async (req, res, next) => {
   }
 });
 
-router.put('/:id/accept_trip', async (req, res, next) => {
+router.put('/:id/accept_trip', helpers.requireAuthentication, async (req, res, next) => {
   let trip_id = req.params.id;
-  let { driver_id } = req.body;
+  let driver_id = req.user.driver_id;
   let trip = await new Trip({id: trip_id}).fetch();
   let driver = await new Driver({id: driver_id}).fetch();
   if (trip && driver && (driver.toJSON().vehicle_id) && (trip.toJSON().status == 'holding')) {
@@ -79,7 +79,7 @@ router.put('/:id/accept_trip', async (req, res, next) => {
     res.status(422).json({errors: {message: 'No se pudo encontrar el Viaje o el Conductor no tiene Vehículo asignado'}});
 });
 
-router.put('/:id/start_trip', async (req, res, next) => {
+router.put('/:id/start_trip', helpers.requireAuthentication,async (req, res, next) => {
   let id = req.params.id;
   let trip = await new Trip({id}).fetch();
   if (trip && trip.toJSON().status == 'taken') {
@@ -95,7 +95,7 @@ router.put('/:id/start_trip', async (req, res, next) => {
     res.status(404).json({errors: {message: 'No se pudo encontrar el Viaje'}});
 });
 
-router.put('/:id/finish_trip', async (req, res, next) => {
+router.put('/:id/finish_trip', helpers.requireAuthentication, async (req, res, next) => {
   let trip_id = req.params.id;
   let trip = await new Trip({id: trip_id}).fetch();
   if (trip && trip.toJSON().status === 'active') {
@@ -113,7 +113,7 @@ router.put('/:id/finish_trip', async (req, res, next) => {
     res.status(422).json({errors: {message: 'No se pudo encontrar el Viaje o el Conductor no tiene Vehículo asignado'}});
 });
 
-router.put('/:id/set_rate', async (req, res, next) => {
+router.put('/:id/set_rate', helpers.requireAuthentication, async (req, res, next) => {
   let {comment = "", rate} = req.body;
   let id = req.params.id;
   let trip = await new Trip({id}).fetch();

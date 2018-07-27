@@ -14,8 +14,8 @@ router.get('/', async (req, res, next) => {
   res.status(200).json(drivers.toJSON());
 });
 
-router.get('/:id/active_trip', async (req, res, next) => {
-  let driver_id = req.params.id;
+router.get('/active_trip', helpers.requireAuthentication, async (req, res, next) => {
+  let driver_id = req.user.driver_id;
   let driver = await new Driver({id: driver_id}).fetch();
   if (driver) {
     let trip = await driver.activeTrip();
@@ -28,8 +28,8 @@ router.get('/:id/active_trip', async (req, res, next) => {
     res.status(404).json({errors: {message: 'No se pudo encontrar al Conductor'}});
 });
 
-router.put('/:id/asign_vehicle', async (req, res, next) => {
-  let driver_id = req.params.id;
+router.put('/asign_vehicle', helpers.requireAuthentication, async (req, res, next) => {
+  let driver_id = req.user.driver_id;
   let { vehicle_id } = req.body;
   let vehicle = await new Vehicle({id: vehicle_id}).fetch();
   let driver = await new Driver({id: driver_id}).fetch();
@@ -51,8 +51,8 @@ router.put('/:id/asign_vehicle', async (req, res, next) => {
     res.status(422).json({errors: {message: 'No se pudo encontrar el Conductor o el Vehículo ya esta asigando'}});
 });
 
-router.put('/:id/quit_vehicle', async (req, res, next) => {
-  let driver_id = req.params.id;
+router.put('/quit_vehicle', helpers.requireAuthentication, async (req, res, next) => {
+  let driver_id = req.user.driver_id;
   let driver = await new Driver({id: driver_id}).fetch();
   if (driver) {
     if (driver.toJSON().vehicle_id){
@@ -90,6 +90,37 @@ router.post('/signup', driverValidation.validate, async (req, res, next) => {
   }
   else
     res.status(422).json({errors: {message: 'No se pudo crear el conductor'}});
+});
+
+router.post('/login', async (req, res, next) => {
+  const { email, password } = req.body;
+  let user = await new User({email}).fetch();
+  if (user){
+    const password_hash = SHA256(`${password}`).toString();
+    user = user.toJSON({visibility: false});
+    if (user.password_hash === password_hash){
+      let driver = await new Driver({user_id: user.id}).fetch({withRelated: ['user']});
+      if (driver) {
+        driver = driver.toJSON();
+        const token = authToken.encode({
+          id: user.id,
+          driver_id: driver.id,
+          email: user.email,
+          role: 'driver'
+        });
+        res.status(200).json({ jwt: token });
+      }
+      else{
+        res.status(422).json({errors: [{message: 'El usuario no es Conductor'}]});
+      }
+    }
+    else {
+      res.status(422).json({errors: [{message: 'El email o la contraseña son incorrectos'}]});
+    }
+  }
+  else {
+    res.status(422).json({errors: [{message: 'El email o la contraseña son incorrectos'}]});
+  }
 });
 
 module.exports = router;
