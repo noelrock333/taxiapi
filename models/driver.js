@@ -9,8 +9,12 @@ const Driver = bookshelf.Model.extend({
     return this.belongsTo(User)
   },
   vehicle: function(){
-    const User = require('./user');
+    const Vehicle = require('./vehicle');
     return this.belongsTo(Vehicle)
+  },
+  trip: function(){
+    const Trip = require('./trip');
+    return this.hasMany(Trip)
   },
   activeTrip: function(){
     const Trip = require('./trip');
