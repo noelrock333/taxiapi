@@ -3,7 +3,6 @@ const router = express.Router();
 const knex = require('../knex');
 const helpers = require('../lib/helpers');
 const Trip = require('../models/trip');
-const Driver = require('../models/driver');
 const User = require('../models/user');
 const validateTrip = require('../validations/models/trip');
 
@@ -57,60 +56,6 @@ router.get('/:id', helpers.requireAuthentication, async (req, res, next) => {
   else {
     res.status(404).json({errors: {message: 'No se pudo encontrar ningun viaje'}});
   }
-});
-
-router.put('/:id/accept_trip', helpers.requireAuthentication, async (req, res, next) => {
-  let trip_id = req.params.id;
-  let driver_id = req.user.driver_id;
-  let trip = await new Trip({id: trip_id}).fetch();
-  let driver = await new Driver({id: driver_id}).fetch();
-  if (trip && driver && (driver.toJSON().vehicle_id) && (trip.toJSON().status == 'holding')) {
-    const vehicle_id = driver.toJSON().vehicle_id;
-    trip = await trip.save({ status: 'taken', driver_id, vehicle_id}, {patch: true});
-    if (trip.toJSON().vehicle_id == vehicle_id){
-      driver = await driver.save({status: 'busy'}, {patch: true});
-      trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle']});
-      res.status(200).json(trip.toJSON());
-    }
-    else
-      res.status(422).json({errors: {message: 'No se pudo actualizar el Viaje'}});
-  }
-  else
-    res.status(422).json({errors: {message: 'No se pudo encontrar el Viaje o el Conductor no tiene Vehículo asignado'}});
-});
-
-router.put('/:id/start_trip', helpers.requireAuthentication,async (req, res, next) => {
-  let id = req.params.id;
-  let trip = await new Trip({id}).fetch();
-  if (trip && trip.toJSON().status == 'taken') {
-    trip = await trip.save({status: 'active'}, {patch: true});
-    if (trip.toJSON().status == 'active'){
-      trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle']});
-      res.status(200).json(trip.toJSON());
-    }
-    else
-      res.status(422).json({errors: {message: 'No se pudo actualizar el Viaje'}});
-  }
-  else
-    res.status(404).json({errors: {message: 'No se pudo encontrar el Viaje'}});
-});
-
-router.put('/:id/finish_trip', helpers.requireAuthentication, async (req, res, next) => {
-  let trip_id = req.params.id;
-  let trip = await new Trip({id: trip_id}).fetch();
-  if (trip && trip.toJSON().status === 'active') {
-    trip = await trip.save({status: 'finished'}, {patch: true});
-    if (trip.toJSON().status == 'finished'){
-      let driver = await new Driver({id: trip.toJSON().driver_id}).fetch();
-      driver = await driver.save({status: 'free'}, {patch: true});
-      trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle']});
-      res.status(200).json(trip.toJSON());
-    }
-    else
-      res.status(422).json({errors: {message: 'No se pudo actualizar el status del Viaje'}})
-  }
-  else
-    res.status(422).json({errors: {message: 'No se pudo encontrar el Viaje o el Conductor no tiene Vehículo asignado'}});
 });
 
 router.put('/:id/set_rate', helpers.requireAuthentication, async (req, res, next) => {
