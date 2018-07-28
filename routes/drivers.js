@@ -107,7 +107,7 @@ router.put('/start_trip', helpers.requireAuthentication,async (req, res, next) =
         res.status(422).json({errors: {message: 'No se pudo actualizar el Viaje'}});
     }
     else {
-      res.status(422).json({errors: {message: 'El driver no tiene ningun viaje activo'}});
+      res.status(422).json({errors: {message: 'El Conductor no puede iniciar el viaje si no lo ha tomado'}});
     }
   }
   else
@@ -128,7 +128,9 @@ router.put('/finish_trip', helpers.requireAuthentication, async (req, res, next)
         res.status(200).json(trip.toJSON());
       }
       else
-        res.status(422).json({errors: {message: 'El driver no tiene ningun viaje activo'}})
+        res.status(422).json({errors: {message: 'No se pudo actualizar el estado del Viaje'}});
+    }else {
+      res.status(422).json({errors: {message: 'El Conductor no puede finalizar el viaje si no lo ha iniciado'}})
     }
   }
   else
