@@ -10,9 +10,6 @@ function validateTrip(attributes) {
     },
     lng_origin: {
       presence: {allowEmpty: false}
-    },
-    user_id: {
-      presence: {allowEmpty: false}
     }
   };
 
