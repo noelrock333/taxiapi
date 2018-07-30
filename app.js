@@ -57,6 +57,18 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
+io.on('connection', socket => {
+  socket.on('joinToDrivers', driver_id => {
+    socket.join('drivers');
+    socket.join(`driver-${driver_id}`);
+  });
+
+  socket.on('joinToUsers', user_id => {
+    socket.join('users');
+    socket.join(`user-${user_id}`);
+  });
+});
+
 module.exports = {
   app: app,
   server: server

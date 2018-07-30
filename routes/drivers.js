@@ -83,6 +83,7 @@ router.put('/accept_trip', helpers.requireAuthentication, async (req, res, next)
     if (trip.toJSON().vehicle_id == vehicle_id){
       driver = await driver.save({status: 'busy'}, {patch: true});
       trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle']});
+      res.io.in('drivers').emit('deleteTrip',{ trip_id: trip.toJSON().id });
       res.status(200).json(trip.toJSON());
     }
     else
