@@ -83,7 +83,8 @@ router.put('/accept_trip', helpers.requireAuthentication, async (req, res, next)
     if (trip.toJSON().vehicle_id == vehicle_id){
       driver = await driver.save({status: 'busy'}, {patch: true});
       trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle']});
-      res.io.in('drivers').emit('deleteTrip',{ trip_id: trip.toJSON().id });
+      res.io.in('drivers').emit('tripTaken', { trip_id: trip.toJSON().id });
+      res.io.in(`user-${trip.toJSON().user_id}`).emit('tripAccepted', trip.toJSON());
       res.status(200).json(trip.toJSON());
     }
     else
@@ -147,7 +148,7 @@ router.put('/cancel_trip', helpers.requireAuthentication, async (req, res, next)
       if (trip.toJSON().status == 'holding'){
         driver = await new Driver({id: driver.id}).save({status: 'free'}, {patch: true});
         trip = await trip.fetch({withRelated: ['user']});
-        res.io.in(`user-${trip.toJSON().user_id}`).emit('tripCancelled');
+        res.io.in(`user-${trip.toJSON().user_id}`).emit('tripCanceled');
         res.status(200).json(trip.toJSON());
       }
       else

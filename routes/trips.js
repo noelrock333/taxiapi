@@ -35,6 +35,7 @@ router.post('/', helpers.requireAuthentication, validateTrip.validate, async (re
   if (trip){
     let trip_id = trip.get('id');
     trip = await new Trip({id: trip_id}).fetch({withRelated: ['user', 'driver.user','vehicle']});
+    res.io.in('drivers').emit('newTrip', trip.toJSON());
     res.status(201).json(trip.toJSON());
   }
   else
