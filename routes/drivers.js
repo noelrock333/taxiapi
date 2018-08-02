@@ -171,7 +171,13 @@ router.post('/signup', driverValidation.validate, async (req, res, next) => {
     let driver = await new Driver({ license_number, status, user_id }).save();
     if (driver){
       driver = await driver.fetch({withRelated: ['vehicle', 'user']});
-      res.status(201).json(driver.toJSON());
+      driver = driver.toJSON();
+      const token = authToken.encode({
+        id: driver.user.id,
+        driver_id: driver.id,
+        role: 'driver'
+      });
+      res.status(201).json({ jwt: token });
     }
     else{
       user = await new User({id: user_id}).destroy();

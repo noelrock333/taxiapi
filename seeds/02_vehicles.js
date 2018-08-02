@@ -4,7 +4,7 @@ exports.seed = function(knex, Promise) {
     .then(function () {
       return knex('vehicles').insert([
         {
-          id: 1,
+          //id: 1
           organization: 'Libertad',
           license_plate: '123456A',
           number: '1',
@@ -13,7 +13,7 @@ exports.seed = function(knex, Promise) {
           service_type_id: 1
         },
         {
-          id: 2,
+          //id: 2
           organization: 'Nuñes',
           license_plate: '123456B',
           number: '2',
@@ -22,7 +22,7 @@ exports.seed = function(knex, Promise) {
           service_type_id: 1
         },
         {
-          id: 3,
+          //id: 3
           organization: 'Libertad',
           license_plate: '123456C',
           number: '45',
@@ -31,7 +31,7 @@ exports.seed = function(knex, Promise) {
           service_type_id: 1
         },
         {
-          id: 4,
+          //id: 4
           organization: 'Libertad',
           license_plate: '123456D',
           number: '12',
@@ -40,7 +40,7 @@ exports.seed = function(knex, Promise) {
           service_type_id: 2
         },
         {
-          id: 5,
+          //id: 5
           organization: 'Libertad',
           license_plate: '123456E',
           number: '13',
@@ -49,7 +49,7 @@ exports.seed = function(knex, Promise) {
           service_type_id: 2
         },
         {
-          id: 6,
+          //id: 6
           organization: 'Libertad',
           license_plate: '123456F',
           number: '14',
@@ -58,7 +58,7 @@ exports.seed = function(knex, Promise) {
           service_type_id: 2
         },
         {
-          id: 7,
+          //id: 7
           organization: 'Libertad',
           license_plate: '123456G',
           number: '19',
@@ -67,7 +67,7 @@ exports.seed = function(knex, Promise) {
           service_type_id: 3
         },
         {
-          id: 8,
+          //id: 8
           organization: 'Libertad',
           license_plate: '123456H',
           number: '13',
@@ -76,7 +76,7 @@ exports.seed = function(knex, Promise) {
           service_type_id: 3
         },
         {
-          id: 9,
+          //id: 9
           organization: 'Libertad',
           license_plate: '123456I',
           number: '14',

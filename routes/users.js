@@ -18,8 +18,15 @@ router.post('/signup', async (req, res, next) => {
   let { email, password, full_name } = req.body;
   var password_hash = SHA256(`${password}`).toString();
   let user = await new User({ email, password_hash, full_name}).save();
-  if (user)
-    res.status(201).json(user.toJSON());
+  if (user){
+    user = user.toJSON();
+    const token = authToken.encode({
+      id: user.id,
+      email: user.email,
+      role: 'customer'
+    });
+    res.status(201).json({ jwt: token });
+  }
   else
     res.status(422).json({errors: [{message: 'No se pudo crear el Usuario'}]})
 });
