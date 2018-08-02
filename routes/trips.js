@@ -42,12 +42,6 @@ router.post('/', helpers.requireAuthentication, validateTrip.validate, async (re
     res.status(422).json({errors: {message: 'No se pudo crear el viaje'}});
 });
 
-router.post("/trips_in_range", helpers.requireAuthentication, async (req, res, next) => {
-  let {lat, lng} = req.body;
-  let trips = await new Trip().tripsInRange(lat,lng);
-  res.status(200).json(trips);
-});
-
 router.get('/:id', helpers.requireAuthentication, async (req, res, next) => {
   const id = req.params.id;
   let trip = await new Trip({id}).fetch({withRelated: ['user', 'driver.user','vehicle']});
@@ -57,40 +51,6 @@ router.get('/:id', helpers.requireAuthentication, async (req, res, next) => {
   else {
     res.status(404).json({errors: {message: 'No se pudo encontrar ningun viaje'}});
   }
-});
-
-router.put('/:id/set_rate', helpers.requireAuthentication, async (req, res, next) => {
-  let {comment = "", rate} = req.body;
-  let id = req.params.id;
-  let trip = await new Trip({id}).fetch();
-  if (trip){
-    trip = await trip.save({comment, rate}, {patch: true});
-    if (trip.toJSON().rate == rate){
-      trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle']});
-      res.status(200).json(trip.toJSON());
-    }
-    else
-      res.status(422).json({errors: {message: 'No se pudo actualizar el rate del Viaje'}})
-  }
-  else
-    res.status(404).json({errors: {message: 'No se pudo encontrar el Viaje'}});
-});
-
-router.put('/:id/cancel_trip', async (req, res, next) => {
-  let id = req.params.id;
-  let trip = await new Trip({id}).fetch();
-  if (trip){
-    trip = await trip.save({status: 'canceled'},{patch: true});
-    if (trip.toJSON().status == 'canceled'){
-      trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle']});
-      res.io.in('drivers').emit('deleteTrip', {trip_id: trip.toJSON().id});
-      res.status(200).json(trip.toJSON());
-    }
-    else
-      res.status(422).json({errors: {message: 'No se pudo actualizar el status del Viaje'}});
-  }
-  else
-    res.status(404).json({errors: {message: 'No se pudo encontrar el Viaje'}});
 });
 
 module.exports = router;
