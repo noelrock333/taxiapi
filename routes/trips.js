@@ -35,6 +35,7 @@ router.post('/', helpers.requireAuthentication, validateTrip.validate, async (re
   if (trip){
     let trip_id = trip.get('id');
     trip = await new Trip({id: trip_id}).fetch({withRelated: ['user', 'driver.user','vehicle']});
+    res.io.in('drivers').emit('newTrip', trip.toJSON());
     res.status(201).json(trip.toJSON());
   }
   else
@@ -82,6 +83,7 @@ router.put('/:id/cancel_trip', async (req, res, next) => {
     trip = await trip.save({status: 'canceled'},{patch: true});
     if (trip.toJSON().status == 'canceled'){
       trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle']});
+      res.io.in('drivers').emit('deleteTrip', {trip_id: trip.toJSON().id});
       res.status(200).json(trip.toJSON());
     }
     else

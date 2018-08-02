@@ -83,6 +83,8 @@ router.put('/accept_trip', helpers.requireAuthentication, async (req, res, next)
     if (trip.toJSON().vehicle_id == vehicle_id){
       driver = await driver.save({status: 'busy'}, {patch: true});
       trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle']});
+      res.io.in('drivers').emit('tripTaken', { trip_id: trip.toJSON().id });
+      res.io.in(`user-${trip.toJSON().user_id}`).emit('tripAccepted', trip.toJSON());
       res.status(200).json(trip.toJSON());
     }
     else
@@ -135,6 +137,28 @@ router.put('/finish_trip', helpers.requireAuthentication, async (req, res, next)
   }
   else
     res.status(422).json({errors: {message: 'No se pudo encontrar el Viaje o el Conductor no tiene Vehículo asignado'}});
+});
+
+router.put('/cancel_trip', helpers.requireAuthentication, async (req, res, next) => {
+  let driver = req.driver;
+  if (driver) {
+    let trip = await new Driver({id: driver.id}).activeTrip();
+    if (trip) {
+      trip = await trip.save({status: 'holding', driver_id: null, vehicle_id: null}, { patch: true });
+      if (trip.toJSON().status == 'holding'){
+        driver = await new Driver({id: driver.id}).save({status: 'free'}, {patch: true});
+        trip = await trip.fetch({withRelated: ['user']});
+        res.io.in(`user-${trip.toJSON().user_id}`).emit('tripCanceled');
+        res.status(200).json(trip.toJSON());
+      }
+      else
+        res.status(422).json({errors: {message: 'No se puso cancelar el Viaje'}});
+    }
+    else
+      res.status(422).json({errors: {message: 'El conductor no tiene un Viaje activo'}});
+  }
+  else
+    res.status(422).json({errors: {message: 'Necesitas estar loggeado como conductor'}});
 });
 
 router.post('/signup', driverValidation.validate, async (req, res, next) => {
