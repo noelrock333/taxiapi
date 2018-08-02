@@ -212,4 +212,10 @@ router.post('/login', async (req, res, next) => {
   }
 });
 
+router.post("/trips_in_range", helpers.requireAuthentication, async (req, res, next) => {
+  let {lat, lng} = req.body;
+  let trips = await new Driver().tripsInRange(lat,lng);
+  res.status(200).json(trips);
+});
+
 module.exports = router;

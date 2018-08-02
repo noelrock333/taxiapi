@@ -4,6 +4,7 @@ const knex = require('../knex');
 const SHA256 = require('crypto-js/sha256');
 const authToken = require('../lib/auth-token');
 const User = require('../models/user');
+const Trip = require('../models/trip');
 const helpers = require('../lib/helpers');
 
 /* GET users listing. */
@@ -60,8 +61,8 @@ router.get('/active_trip', helpers.requireAuthentication, async (req, res, next)
     res.status(404).json({errors: [{message: 'No se pudo encontrar un Usuario'}]});
 });
 
-router.get('/:id/missing_rates', helpers.requireAuthentication, async (req, res, next) => {
-  let user_id = req.params.id;
+router.get('/missing_rates', helpers.requireAuthentication, async (req, res, next) => {
+  let user_id = req.user.id;
   let user = await new User({id: user_id}).fetch();
   if (user) {
     let trips = await user.missingRates();
@@ -69,6 +70,39 @@ router.get('/:id/missing_rates', helpers.requireAuthentication, async (req, res,
   }
   else
     res.status(404).json({errors: [{message: 'No se pudo encontrar un Usuario'}]});
+});
+
+router.put('/set_rate', helpers.requireAuthentication, async (req, res, next) => {
+  let user_id = req.user.id;
+  let {comment = "", rate, trip_id} = req.body;
+  let trip = await new Trip({id: trip_id}).fetch();
+  if (trip && trip.toJSON().user_id == user_id && trip.toJSON().status == "finished"){
+    trip = await trip.save({comment, rate}, {patch: true});
+    if (trip.toJSON().rate == rate){
+      trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle']});
+      res.status(200).json(trip.toJSON());
+    }
+    else
+      res.status(422).json({errors: {message: 'No se pudo actualizar el rate del Viaje'}})
+  }
+  else
+    res.status(404).json({errors: {message: 'No se pudo encontrar el Viaje'}});
+});
+
+router.put('/cancel_trip', async (req, res, next) => {
+  let id = req.params.id;
+  let trip = await new Trip({id}).fetch();
+  if (trip){
+    trip = await trip.save({status: 'canceled'},{patch: true});
+    if (trip.toJSON().status == 'canceled'){
+      trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle']});
+      res.status(200).json(trip.toJSON());
+    }
+    else
+      res.status(422).json({errors: {message: 'No se pudo actualizar el status del Viaje'}});
+  }
+  else
+    res.status(404).json({errors: {message: 'No se pudo encontrar el Viaje'}});
 });
 
 module.exports = router;

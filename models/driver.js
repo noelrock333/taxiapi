@@ -23,6 +23,29 @@ const Driver = bookshelf.Model.extend({
       .where('status', 'in', status)
       .fetch({withRelated: ['user', 'driver.user','vehicle']});
     return trip
+  },tripsInRange: async function(lat, lon){
+    const geodist = require('geodist');
+    const Trip = require('./trip');
+
+    const geodistOptions = {exact: true, unit: 'km'};
+    let trips = await new Trip().where('status', 'holding').fetchAll({withRelated: ['user']});
+    trips = trips.toJSON();
+    const origin_coords = {lat, lon};
+    const availableTrips = trips.map((trip) => {
+      let destiny_coords = {lat: trip.lat_origin, lon: trip.lng_origin};
+      let distance = geodist(origin_coords, destiny_coords, geodistOptions)
+      if (distance < 4) {
+        return (
+          {
+            id: trip.id,
+            address_origin: trip.address_origin,
+            user: trip.user,
+            distance
+          }
+        )
+      }
+    });
+    return availableTrips.filter((item) => item != null);
   }
 });
 
