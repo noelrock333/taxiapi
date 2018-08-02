@@ -8,17 +8,17 @@ const vehicleValidation = require('../validations/models/vehicle');
 
 
 router.get('/', async (req, res, next) => {
-  const vehicles = await new Vehicle().fetchAll({withRelated: 'service_type'});
+  const vehicles = await new Vehicle().fetchAll({withRelated: ['service_type', "organization"]});
   res.status(200).json(vehicles.toJSON());
 });
 
 router.post('/', vehicleValidation.validate, async (req, res, next) => {
-  let {organization, license_plate, number, model, year, service_type_id} = req.body;
+  let {number, organization_id,service_type_id = 1} = req.body;
   let vehicle = await new Vehicle({
-    organization, license_plate, number, model, year, service_type_id
+    number, organization_id, service_type_id
   }).save();
   if (vehicle){
-    vehicle = await vehicle.fetch({withRelated: 'service_type'});
+    vehicle = await vehicle.fetch({withRelated: ['service_type', "organization"]});
     res.status(201).json(vehicle.toJSON());
   }
   else
@@ -27,7 +27,7 @@ router.post('/', vehicleValidation.validate, async (req, res, next) => {
 
 router.get('/:id', async (req, res, next) => {
   let id = req.params.id;
-  let vehicle = await new Vehicle({id}).fetch({withRelated: 'service_type'});
+  let vehicle = await new Vehicle({id}).fetch({withRelated: ['service_type', "organization"]});
   if (vehicle)
     res.status(200).json(vehicle.toJSON());
   else
@@ -36,11 +36,11 @@ router.get('/:id', async (req, res, next) => {
 
 router.put('/:id', vehicleValidation.validate, async (req, res, next) => {
   const id = req.params.id;
-  let {organization, license_plate, number, model, year, service_type_id} = req.body;
+  let {number, ervice_type_id, organization_id} = req.body;
   let vehicle = await new Vehicle({id}).fetch();
   if (vehicle){
     vehicle = await vehicle
-      .save({organization, license_plate, number, model, year, service_type_id}, { patch: true });
+      .save({number, ervice_type_id, organization_id}, { patch: true });
     res.status(200).json(vehicle.toJSON());
   }
   else

@@ -7,17 +7,24 @@ exports.up = function(knex, Promise) {
 
           t.timestamps();
         })
+        .createTable('organizations', function(t) {
+          t.increments('id').primary();
+          t.string('name').notNullable();
+
+          t.timestamps();
+        })
         .createTable('vehicles', function (t) {
           t.increments('id').primary();
-          t.string('organization').notNullable();
-          t.string('license_plate').notNullable();
+          t.string('license_plate');
           t.string('number').notNullable();
-          t.string('model').notNullable();
-          t.string('year').notNullable();
+          t.string('model');
+          t.string('year');
           t.enu('status', ['not_assigned','assigned']).defaultTo('not_assigned');
           t.integer('service_type_id').unsigned().notNullable();
+          t.integer('organization_id').unsigned().notNullable();
 
           t.foreign('service_type_id').references('id').inTable('service_types');
+          t.foreign('organization_id').references('id').inTable('organizations');
           t.unique('license_plate');
           t.timestamps();
         })
