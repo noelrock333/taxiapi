@@ -29,18 +29,18 @@ router.get('/active_trip', helpers.requireAuthentication, async (req, res, next)
     res.status(404).json({errors: {message: 'No se pudo encontrar al Conductor'}});
 });
 
-router.put('/asign_vehicle', helpers.requireAuthentication, async (req, res, next) => {
+router.put('/assign_vehicle', helpers.requireAuthentication, async (req, res, next) => {
   let driver_id = req.driver.id;
   let { vehicle_id } = req.body;
   let vehicle = await new Vehicle({id: vehicle_id}).fetch();
   let driver = await new Driver({id: driver_id}).fetch();
-  if (vehicle && driver && vehicle.toJSON().status == 'not_asigned') {
+  if (vehicle && driver && vehicle.toJSON().status == 'not_assigned') {
     if (driver.toJSON().vehicle_id){
       let old_vehicle = await new Vehicle({id: driver.toJSON().vehicle_id}).fetch();
-      old_vehicle = await old_vehicle.save({status: 'not_asigned'}, {patch: true});
+      old_vehicle = await old_vehicle.save({status: 'not_assigned'}, {patch: true});
     }
     driver = await driver.save({vehicle_id}, {patch: true});
-    vehicle = await vehicle.save({status: 'asigned'}, {patch: true});
+    vehicle = await vehicle.save({status: 'assigned'}, {patch: true});
     if (driver.toJSON().vehicle_id == vehicle_id){
       driver = await driver.fetch({withRelated: ['vehicle', 'user']});
       res.status(200).json(driver.toJSON());
@@ -58,7 +58,7 @@ router.put('/quit_vehicle', helpers.requireAuthentication, async (req, res, next
   if (driver) {
     if (driver.toJSON().vehicle_id){
       let old_vehicle = await new Vehicle({id: driver.toJSON().vehicle_id}).fetch();
-      old_vehicle = await old_vehicle.save({status: 'not_asigned'}, {patch: true});
+      old_vehicle = await old_vehicle.save({status: 'not_assigned'}, {patch: true});
     }
     driver = await driver.save({vehicle_id: null}, {patch: true});
     if (driver.toJSON().vehicle_id == null){

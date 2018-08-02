@@ -14,7 +14,7 @@ exports.up = function(knex, Promise) {
           t.string('number').notNullable();
           t.string('model').notNullable();
           t.string('year').notNullable();
-          t.enu('status', ['not_asigned','asigned']).defaultTo('not_asigned');
+          t.enu('status', ['not_assigned','assigned']).defaultTo('not_assigned');
           t.integer('service_type_id').unsigned().notNullable();
 
           t.foreign('service_type_id').references('id').inTable('service_types');
