@@ -96,7 +96,7 @@ router.put('/set_rate', helpers.requireAuthentication, async (req, res, next) =>
     res.status(404).json({errors: {message: 'No se pudo encontrar el Viaje'}});
 });
 
-router.put('/cancel_trip', async (req, res, next) => {
+router.put('/cancel_trip/:id', async (req, res, next) => {
   let id = req.params.id;
   let trip = await new Trip({id}).fetch();
   if (trip){
