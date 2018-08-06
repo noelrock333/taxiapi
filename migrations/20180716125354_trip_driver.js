@@ -67,8 +67,9 @@ exports.up = function(knex, Promise) {
 
 exports.down = function(knex, Promise) {
   return knex.schema
-    .dropTableIfExists('trips')
-    .dropTableIfExists('drivers')
-    .dropTableIfExists('vehicles')
-    .dropTableIfExists('service_types');
+  .dropTableIfExists('trips')
+  .dropTableIfExists('drivers')
+  .dropTableIfExists('vehicles')
+  .dropTableIfExists('organizations')
+  .dropTableIfExists('service_types');
 };
