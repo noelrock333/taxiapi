@@ -70,7 +70,7 @@ router.put('/accept_trip', helpers.requireAuthentication, async (req, res, next)
   let driver = await new Driver({id: driver_id}).fetch();
   if (trip && driver && (driver.toJSON().vehicle_id) && (trip.toJSON().status == 'holding')) {
     const vehicle_id = driver.toJSON().vehicle_id;
-    trip = await trip.save({ status: 'taken', driver_id, vehicle_id}, {patch: true});
+    trip = await trip.save({ status: 'active', driver_id, vehicle_id}, {patch: true});
     if (trip.toJSON().vehicle_id == vehicle_id){
       driver = await driver.save({status: 'busy'}, {patch: true});
       trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle']});
@@ -85,27 +85,27 @@ router.put('/accept_trip', helpers.requireAuthentication, async (req, res, next)
     res.status(422).json({errors: {message: 'No se pudo encontrar el Viaje o el Conductor no tiene Vehículo asignado'}});
 });
 
-router.put('/start_trip', helpers.requireAuthentication,async (req, res, next) => {
-  let driver_id = req.driver.id;
-  let driver = await new Driver({id: driver_id}).fetch();
-  if (driver) {
-    let trip = await driver.activeTrip();
-    if (trip && trip.toJSON().status == 'taken') {
-      trip = await trip.save({status: 'active'}, {patch: true});
-      if (trip.toJSON().status == 'active'){
-        trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle']});
-        res.status(200).json(trip.toJSON());
-      }
-      else
-        res.status(422).json({errors: {message: 'No se pudo actualizar el Viaje'}});
-    }
-    else {
-      res.status(422).json({errors: {message: 'El Conductor no puede iniciar el viaje si no lo ha tomado'}});
-    }
-  }
-  else
-    res.status(404).json({errors: {message: 'No se pudo encontrar el Conductor'}});
-});
+// router.put('/start_trip', helpers.requireAuthentication,async (req, res, next) => {
+//   let driver_id = req.driver.id;
+//   let driver = await new Driver({id: driver_id}).fetch();
+//   if (driver) {
+//     let trip = await driver.activeTrip();
+//     if (trip && trip.toJSON().status == 'taken') {
+//       trip = await trip.save({status: 'active'}, {patch: true});
+//       if (trip.toJSON().status == 'active'){
+//         trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle']});
+//         res.status(200).json(trip.toJSON());
+//       }
+//       else
+//         res.status(422).json({errors: {message: 'No se pudo actualizar el Viaje'}});
+//     }
+//     else {
+//       res.status(422).json({errors: {message: 'El Conductor no puede iniciar el viaje si no lo ha tomado'}});
+//     }
+//   }
+//   else
+//     res.status(404).json({errors: {message: 'No se pudo encontrar el Conductor'}});
+// });
 
 router.put('/finish_trip', helpers.requireAuthentication, async (req, res, next) => {
   let driver_id = req.driver.id;
