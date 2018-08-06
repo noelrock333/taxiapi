@@ -3,7 +3,7 @@ const bookshelf = require('../bookshelf');
 const User = bookshelf.Model.extend({
   hasTimestamps: true,
   tableName: 'users',
-  hidden: ['password_hash'],
+  hidden: ['password_hash', 'device_id'],
   trips: function(){
     const Trip = require('./trip');
     return this.hasMany(Trip);
@@ -22,6 +22,9 @@ const User = bookshelf.Model.extend({
       .where({status: 'finished', rate: 0})
       .fetchAll();
     return trip
+  },
+  storeDeviceId: async function(device_id){
+    return await this.save({device_id},{patch: true});
   }
 });
 
