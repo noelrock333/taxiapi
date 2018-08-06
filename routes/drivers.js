@@ -34,13 +34,8 @@ router.put('/assign_vehicle', helpers.requireAuthentication, async (req, res, ne
   let { vehicle_id } = req.body;
   let vehicle = await new Vehicle({id: vehicle_id}).fetch();
   let driver = await new Driver({id: driver_id}).fetch();
-  if (vehicle && driver && vehicle.toJSON().status == 'not_assigned') {
-    if (driver.toJSON().vehicle_id){
-      let old_vehicle = await new Vehicle({id: driver.toJSON().vehicle_id}).fetch();
-      old_vehicle = await old_vehicle.save({status: 'not_assigned'}, {patch: true});
-    }
+  if (vehicle && driver) {
     driver = await driver.save({vehicle_id}, {patch: true});
-    vehicle = await vehicle.save({status: 'assigned'}, {patch: true});
     if (driver.toJSON().vehicle_id == vehicle_id){
       driver = await driver.fetch({withRelated: ['vehicle', 'user']});
       res.status(200).json(driver.toJSON());
@@ -56,10 +51,6 @@ router.put('/quit_vehicle', helpers.requireAuthentication, async (req, res, next
   let driver_id = req.driver.id;
   let driver = await new Driver({id: driver_id}).fetch();
   if (driver) {
-    if (driver.toJSON().vehicle_id){
-      let old_vehicle = await new Vehicle({id: driver.toJSON().vehicle_id}).fetch();
-      old_vehicle = await old_vehicle.save({status: 'not_assigned'}, {patch: true});
-    }
     driver = await driver.save({vehicle_id: null}, {patch: true});
     if (driver.toJSON().vehicle_id == null){
       driver = await driver.fetch({withRelated: ['vehicle', 'user']});
@@ -219,7 +210,7 @@ router.post('/login', async (req, res, next) => {
   }
 });
 
-router.post("/trips_in_range", helpers.requireAuthentication, async (req, res, next) => {
+router.post('/trips_in_range', helpers.requireAuthentication, async (req, res, next) => {
   let {lat, lng} = req.body;
   let trips = await new Driver().tripsInRange(lat,lng);
   res.status(200).json(trips);

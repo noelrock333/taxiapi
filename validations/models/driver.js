@@ -23,8 +23,8 @@ function validateDriver(attributes) {
     },
     status: {
       inclusion: [
-        "free",
-        "busy"
+        'free',
+        'busy'
       ]
     }
   };

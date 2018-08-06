@@ -10,10 +10,11 @@ var cors = require('cors');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-var tripRouter = require('./routes/trips');
+var tripsRouter = require('./routes/trips');
 var driversRouter = require('./routes/drivers');
 var vehiclesRouter = require('./routes/vehicles');
 var serviceTypesRouter = require('./routes/service_types');
+var organizationsRouter = require('./routes/organizations');
 
 var app = express();
 var server = require('http').Server(app);
@@ -36,10 +37,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-app.use('/trips', tripRouter);
+app.use('/trips', tripsRouter);
 app.use('/drivers', driversRouter);
 app.use('/vehicles', vehiclesRouter);
 app.use('/service_types', serviceTypesRouter);
+app.use('/organizations', organizationsRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

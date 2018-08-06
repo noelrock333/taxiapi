@@ -2,25 +2,10 @@ const validate = require('../../lib/validate');
 
 function validateVehicle(attributes) {
   let constraints = {
-    organization: {
+    organization_id: {
       presence: {allowEmpty: false}
-    },
-    license_plate: {
-      presence: {allowEmpty: false},
-      uniqueness: {
-        table: 'vehicles'
-      }
     },
     number: {
-      presence: {allowEmpty: false}
-    },
-    model: {
-      presence: {allowEmpty: false}
-    },
-    year: {
-      presence: {allowEmpty: false}
-    },
-    service_type_id: {
       presence: {allowEmpty: false}
     }
   };

@@ -11,7 +11,7 @@ exports.seed = function(knex, Promise) {
           lat_origin: '19.264988',
           lng_origin: '-103.718204',
           user_id: 1,
-          created_at: "2018-07-27T17:59:17.082Z"
+          created_at: '2018-07-27T17:59:17.082Z'
         },
         {
           // id: 2
@@ -19,7 +19,7 @@ exports.seed = function(knex, Promise) {
           lat_origin: '19.255678',
           lng_origin: '-103.719818',
           user_id: 2,
-          created_at: "2018-07-27T17:59:17.082Z"
+          created_at: '2018-07-27T17:59:17.082Z'
         },
         {
           // id: 3
@@ -27,7 +27,7 @@ exports.seed = function(knex, Promise) {
           lat_origin: '19.252040',
           lng_origin: '-103.722480',
           user_id: 3,
-          created_at: "2018-07-27T17:59:17.082Z"
+          created_at: '2018-07-27T17:59:17.082Z'
         },
         {
           // id: 4
@@ -35,7 +35,7 @@ exports.seed = function(knex, Promise) {
           lat_origin: '19.249902',
           lng_origin: '-103.732423',
           user_id: 4,
-          created_at: "2018-07-27T17:59:17.082Z"
+          created_at: '2018-07-27T17:59:17.082Z'
         },
         {
           // id: 5
@@ -43,7 +43,7 @@ exports.seed = function(knex, Promise) {
           lat_origin: '19.262549',
           lng_origin: '-103.704608',
           user_id: 5,
-          created_at: "2018-07-27T17:59:17.082Z"
+          created_at: '2018-07-27T17:59:17.082Z'
         },
         {
           // id: 6
@@ -51,7 +51,7 @@ exports.seed = function(knex, Promise) {
           lat_origin: '19.265729',
           lng_origin: '-103.697904',
           user_id: 6,
-          created_at: "2018-07-27T17:59:17.082Z"
+          created_at: '2018-07-27T17:59:17.082Z'
         },
       ]);
     });
