@@ -96,14 +96,14 @@ router.put('/set_rate', helpers.requireAuthentication, async (req, res, next) =>
     res.status(404).json({errors: {message: 'No se pudo encontrar el Viaje'}});
 });
 
-router.put('/cancel_trip', async (req, res, next) => {
+router.put('/cancel_trip/:id', async (req, res, next) => {
   let id = req.params.id;
   let trip = await new Trip({id}).fetch();
   if (trip){
     trip = await trip.save({status: 'canceled'},{patch: true});
     if (trip.toJSON().status == 'canceled'){
       trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle']});
-      res.io.in('drivers').emit('newTrip', trip.toJSON());
+      res.io.in('drivers').emit('deleteTrip', { trip_id: trip.toJSON().id });
       res.status(200).json(trip.toJSON());
     }
     else
