@@ -9,7 +9,7 @@ const vehicleValidation = require('../validations/models/vehicle');
 
 
 router.get('/', async (req, res, next) => {
-  const vehicles = await new Vehicle().fetchAll({withRelated: ['service_type', "organization"]});
+  const vehicles = await new Vehicle().fetchAll({withRelated: ['service_type', 'organization']});
   res.status(200).json(vehicles.toJSON());
 });
 
@@ -21,7 +21,7 @@ router.post('/', vehicleValidation.validate, helpers.requireAuthentication, asyn
   if (vehicle && driver){
     driver = driver.save({vehicle_id: vehicle.toJSON().id},{patch: true});
     if (driver.toJSON().vehicle_id == vehicle.toJSON.id){
-      vehicle = await vehicle.fetch({withRelated: ['service_type', "organization"]});
+      vehicle = await vehicle.fetch({withRelated: ['service_type', 'organization']});
       res.status(201).json(vehicle.toJSON());
     }
   }
@@ -31,7 +31,7 @@ router.post('/', vehicleValidation.validate, helpers.requireAuthentication, asyn
 
 router.get('/:id', async (req, res, next) => {
   let id = req.params.id;
-  let vehicle = await new Vehicle({id}).fetch({withRelated: ['service_type', "organization"]});
+  let vehicle = await new Vehicle({id}).fetch({withRelated: ['service_type', 'organization']});
   if (vehicle)
     res.status(200).json(vehicle.toJSON());
   else
