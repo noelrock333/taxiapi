@@ -32,12 +32,14 @@ router.post('/signup', async (req, res, next) => {
 });
 
 router.post('/login', async (req, res, next) => {
-  const { email, password } = req.body;
+  const { email, password, device_id = null } = req.body;
   let user = await new User({email}).fetch();
   if (user){
     const password_hash = SHA256(`${password}`).toString();
-    user = user.toJSON({visibility: false});
-    if (user.password_hash === password_hash){
+    user_password = user.toJSON({visibility: false}).password_hash;
+    if (user_password === password_hash){
+      if (device_id) user = await user.storeDeviceId(device_id);
+      user = user.toJSON();
       const token = authToken.encode({
         id: user.id,
         email: user.email,
