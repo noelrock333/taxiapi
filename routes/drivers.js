@@ -149,6 +149,7 @@ router.put('/cancel_trip', helpers.requireAuthentication, async (req, res, next)
         driver = await new Driver({id: driver.id}).save({status: 'free'}, {patch: true});
         trip = await trip.fetch({withRelated: ['user']});
         res.io.in(`user-${trip.toJSON().user_id}`).emit('tripCanceled');
+        res.io.in('drivers').emit('newTrip', trip.toJSON());
         res.status(200).json(trip.toJSON());
       }
       else

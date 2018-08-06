@@ -103,7 +103,7 @@ router.put('/cancel_trip/:id', async (req, res, next) => {
     trip = await trip.save({status: 'canceled'},{patch: true});
     if (trip.toJSON().status == 'canceled'){
       trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle']});
-      res.io.in('drivers').emit('newTrip', trip.toJSON());
+      res.io.in('drivers').emit('deleteTrip', trip.toJSON());
       res.status(200).json(trip.toJSON());
     }
     else
