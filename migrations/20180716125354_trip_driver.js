@@ -19,7 +19,6 @@ exports.up = function(knex, Promise) {
           t.string('number').notNullable();
           t.string('model');
           t.string('year');
-          t.enu('status', ['not_assigned','assigned']).defaultTo('not_assigned');
           t.integer('service_type_id').unsigned().notNullable();
           t.integer('organization_id').unsigned().notNullable();
 

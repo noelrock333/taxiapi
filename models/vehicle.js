@@ -10,6 +10,13 @@ const Vehicle = bookshelf.Model.extend({
   },
   organization: function(){
     return this.belongsTo(Organization);
+  },
+  findOrCreate: async function(number, organization_id, service_type_id){
+    let vehicle = await this.where({number, organization_id, service_type_id}).fetch();
+    if (!vehicle){
+        vehicle = await this.save({number, organization_id, service_type_id});
+    }
+    return vehicle;
   }
 });
 

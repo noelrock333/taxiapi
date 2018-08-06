@@ -4,6 +4,7 @@ const SHA256 = require('crypto-js/sha256');
 const authToken = require('../lib/auth-token');
 const helpers = require('../lib/helpers');
 const Vehicle = require('../models/vehicle');
+const Driver = require('../models/driver');
 const vehicleValidation = require('../validations/models/vehicle');
 
 
@@ -12,14 +13,17 @@ router.get('/', async (req, res, next) => {
   res.status(200).json(vehicles.toJSON());
 });
 
-router.post('/', vehicleValidation.validate, async (req, res, next) => {
+router.post('/', vehicleValidation.validate, helpers.requireAuthentication, async (req, res, next) => {
+  let driver_id = req.driver.id;
   let {number, organization_id,service_type_id = 1} = req.body;
-  let vehicle = await new Vehicle({
-    number, organization_id, service_type_id
-  }).save();
-  if (vehicle){
-    vehicle = await vehicle.fetch({withRelated: ['service_type', "organization"]});
-    res.status(201).json(vehicle.toJSON());
+  let driver = await new Driver({id: driver_id}).fetch();
+  let vehicle = await new Vehicle().findOrCreate(number, organization_id, service_type_id);
+  if (vehicle && driver){
+    driver = driver.save({vehicle_id: vehicle.toJSON().id},{patch: true});
+    if (driver.toJSON().vehicle_id == vehicle.toJSON.id){
+      vehicle = await vehicle.fetch({withRelated: ['service_type', "organization"]});
+      res.status(201).json(vehicle.toJSON());
+    }
   }
   else
     res.status(422).json({errors: {message: 'No se pudo crear el Vehículo'}});
