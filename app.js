@@ -36,12 +36,12 @@ app.use(function(req, res, next){
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
-app.use('/trips', tripsRouter);
-app.use('/drivers', driversRouter);
-app.use('/vehicles', vehiclesRouter);
-app.use('/service_types', serviceTypesRouter);
-app.use('/organizations', organizationsRouter);
+app.use('/api/users', usersRouter);
+app.use('/api/trips', tripsRouter);
+app.use('/api/drivers', driversRouter);
+app.use('/api/vehicles', vehiclesRouter);
+app.use('/api/service_types', serviceTypesRouter);
+app.use('/api/organizations', organizationsRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
