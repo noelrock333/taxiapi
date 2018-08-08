@@ -18,7 +18,7 @@ var organizationsRouter = require('./routes/organizations');
 
 var app = express();
 var server = require('http').Server(app);
-var io = require('socket.io')(server);
+var io = require('socket.io')(server, { wsEngine: 'ws' });
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
