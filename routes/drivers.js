@@ -9,6 +9,7 @@ const Driver = require('../models/driver');
 const Vehicle = require('../models/vehicle');
 const Trip = require('../models/trip');
 const driverValidation = require('../validations/models/driver');
+const firebase = require('../firebase');
 
 router.get('/', async (req, res, next) => {
   const drivers = await new Driver().fetchAll({withRelated: ['vehicle', 'user']});
@@ -74,8 +75,19 @@ router.put('/accept_trip', helpers.requireAuthentication, async (req, res, next)
     if (trip.toJSON().vehicle_id == vehicle_id){
       driver = await driver.save({status: 'busy'}, {patch: true});
       trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle']});
-      res.io.in('drivers').emit('tripTaken', { trip_id: trip.toJSON().id });
-      res.io.in(`user-${trip.toJSON().user_id}`).emit('tripAccepted', trip.toJSON());
+
+      firebase
+          .database()
+          .ref('server/holding_trips/')
+          .child(trip.toJSON().id)
+          .remove();
+
+      firebase
+        .database()
+        .ref('server/taken_trips/')
+        .child(trip.toJSON().id)
+        .set(trip.toJSON());
+
       res.status(200).json(trip.toJSON());
     }
     else
@@ -118,6 +130,14 @@ router.put('/finish_trip', helpers.requireAuthentication, async (req, res, next)
         let driver = await new Driver({id: trip.toJSON().driver_id}).fetch();
         driver = await driver.save({status: 'free'}, {patch: true});
         trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle']});
+
+        firebase
+          .database()
+          .ref('server/taken_trips/')
+          .child(trip.toJSON().id)
+          .remove();
+
+        res.io.in(`user-${trip.toJSON().user.id}`).emit('finishedTrip', trip.toJSON());
         res.status(200).json(trip.toJSON());
       }
       else
@@ -139,8 +159,19 @@ router.put('/cancel_trip', helpers.requireAuthentication, async (req, res, next)
       if (trip.toJSON().status == 'holding'){
         driver = await new Driver({id: driver.id}).save({status: 'free'}, {patch: true});
         trip = await trip.fetch({withRelated: ['user']});
-        res.io.in(`user-${trip.toJSON().user_id}`).emit('tripCanceled');
-        res.io.in('drivers').emit('newTrip', trip.toJSON());
+
+        firebase
+          .database()
+          .ref('server/taken_trips/')
+          .child(trip.toJSON().id)
+          .remove();
+
+        firebase
+          .database()
+          .ref('server/holding_trips/')
+          .child(trip.toJSON().id)
+          .set(trip.toJSON());
+
         res.status(200).json(trip.toJSON());
       }
       else

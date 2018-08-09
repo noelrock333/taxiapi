@@ -5,6 +5,7 @@ const helpers = require('../lib/helpers');
 const Trip = require('../models/trip');
 const User = require('../models/user');
 const validateTrip = require('../validations/models/trip');
+const firebase = require('../firebase');
 
 router.get('/', async (req, res, next) => {
   const trips = await new Trip().fetchAll({withRelated: ['user', 'driver.user','vehicle']});
@@ -35,7 +36,13 @@ router.post('/', helpers.requireAuthentication, validateTrip.validate, async (re
   if (trip){
     let trip_id = trip.get('id');
     trip = await new Trip({id: trip_id}).fetch({withRelated: ['user', 'driver.user','vehicle']});
-    res.io.in('drivers').emit('newTrip', trip.toJSON());
+
+    firebase
+      .database()
+      .ref('server/holding_trips/')
+      .child(trip.toJSON().id)
+      .set(trip.toJSON());
+
     res.status(201).json(trip.toJSON());
   }
   else
