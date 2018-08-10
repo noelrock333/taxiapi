@@ -30,6 +30,7 @@ exports.up = function(knex, Promise) {
         .createTable('drivers', function (t) {
           t.increments('id').primary();
           t.string('license_number').notNullable();
+          t.string('public_service_permission_image')
           t.enu('status', ['free','busy']).defaultTo('free');
           t.integer('rate').defaultTo(0);
           t.integer('user_id').unsigned().notNullable();
