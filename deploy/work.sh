@@ -18,8 +18,12 @@ else
   cd $APP_DIR
   git clone $GIT_URL
   cd taxiapi
+  pm2 start ecosystem.config.js --env production
 fi
 
 # Install dependencies
 npm install --production
 npm prune --production
+
+#restart server
+pm2 restart taxiapi
