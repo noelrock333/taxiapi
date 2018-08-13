@@ -41,7 +41,7 @@ router.post('/', helpers.requireAuthentication, validateTrip.validate, async (re
       .database()
       .ref('server/holding_trips/')
       .child(trip.toJSON().id)
-      .set(trip.toJSON());
+      .set({...trip.toJSON(), timestamp: new Date(trip.toJSON().created_at).getTime()})
 
     res.status(201).json(trip.toJSON());
   }

@@ -171,7 +171,7 @@ router.put('/cancel_trip', helpers.requireAuthentication, async (req, res, next)
           .database()
           .ref('server/holding_trips/')
           .child(trip.toJSON().id)
-          .set(trip.toJSON());
+          .set({...trip.toJSON(), timestamp: new Date(trip.toJSON().created_at)});
 
         res.status(200).json(trip.toJSON());
       }
