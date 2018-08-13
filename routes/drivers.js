@@ -10,6 +10,7 @@ const Vehicle = require('../models/vehicle');
 const Trip = require('../models/trip');
 const driverValidation = require('../validations/models/driver');
 const firebase = require('../firebase');
+const { upload } = require('../multer');
 
 router.get('/', async (req, res, next) => {
   const drivers = await new Driver().fetchAll({withRelated: ['vehicle', 'user']});
@@ -184,14 +185,19 @@ router.put('/cancel_trip', helpers.requireAuthentication, async (req, res, next)
     res.status(422).json({errors: {message: 'Necesitas estar loggeado como conductor'}});
 });
 
-router.post('/signup', driverValidation.validate, async (req, res, next) => {
+router.post('/signup', upload.single('public_service_permission_image'), driverValidation.validate,  async (req, res, next) => {
   const {full_name, email, password, license_number, status = 'free' } = req.body;
   let password_hash = SHA256(password).toString();
 
   let user = await new User({ full_name, email, password_hash }).save();
   if (user) {
     let user_id = user.get('id');
-    let driver = await new Driver({ license_number, status, user_id }).save();
+    let driver = await new Driver({
+      license_number,
+      status,
+      user_id,
+      public_service_permission_image: req.file.path
+    }).save();
     if (driver){
       driver = await driver.fetch({withRelated: ['vehicle', 'user']});
       driver = driver.toJSON();
