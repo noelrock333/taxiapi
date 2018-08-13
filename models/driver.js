@@ -40,7 +40,8 @@ const Driver = bookshelf.Model.extend({
             id: trip.id,
             address_origin: trip.address_origin,
             user: trip.user,
-            distance
+            distance,
+            timestamp: new Date(trip.created_at).getTime()
           }
         )
       }
