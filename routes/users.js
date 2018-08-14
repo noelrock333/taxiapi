@@ -104,13 +104,19 @@ router.put('/cancel_trip', helpers.requireAuthentication, async (req, res, next)
   if (user){
     let trip = await user.activeTrip();
     if (trip) {
-      trip = await trip.save({status: 'canceled'},{patch: true});
+      trip = await trip.cancelTrip();
       if (trip.toJSON().status == 'canceled'){
         trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle']});
 
         firebase
           .database()
           .ref('server/holding_trips/')
+          .child(trip.toJSON().id)
+          .remove();
+
+        firebase
+          .database()
+          .ref('server/taken_trips/')
           .child(trip.toJSON().id)
           .remove();
 
