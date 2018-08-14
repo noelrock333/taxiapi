@@ -16,7 +16,7 @@ router.post('/', organizationValidation.validate, async (req, res, next) => {
   if (organization)
     res.status(201).json(organization.toJSON());
   else
-    res.status(422).json({errors: {message: 'No se pudo crear la Organizción'}});
+    res.status(422).json({errors: ['No se pudo crear la Organizción']});
 });
 
 router.delete('/:id', async (req, res, next) => {
@@ -25,12 +25,12 @@ router.delete('/:id', async (req, res, next) => {
   if (organization){
     organization = await organization.destroy();
     if (organization && typeof organization.get('id') === 'undefined')
-      res.status(200).json({flash: {message: 'Organizción elimnada con exito'}});
+      res.status(200).json({flash: ['Organizción elimnada con exito']});
     else
-      res.status(422).json({errors: {message: 'No se pudo eliminar la Organizción'}});
+      res.status(422).json({errors: ['No se pudo eliminar la Organizción']});
   }
   else
-    res.status(404).json({errors: {message: 'No se pudo encontrar la Organizción para eliminar'}})
+    res.status(404).json({errors: ['No se pudo encontrar la Organizción para eliminar']});
 })
 
 module.exports = router;

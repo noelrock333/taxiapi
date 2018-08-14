@@ -15,6 +15,16 @@ function validateVehicle(attributes) {
 
 module.exports = {
   validate: (req, res, next) => {
-    return validateVehicle(req.body).then(() => next(), err => res.status(422).json({errors: err}))
+    return validateVehicle(req.body).then(() => {
+      return next()
+    }, err => {
+      const errors = {
+        errors: Object.keys(err).reduce((previousValue, key) => {
+          return [...previousValue, ...err[key]]
+        }, [])
+      }
+
+      return res.status(422).json(errors);
+    })
   }
 }
