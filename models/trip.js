@@ -18,9 +18,7 @@ const Trip = bookshelf.Model.extend({
   cancelTrip: async function(){
     const now = Date.now();
     const tripTime = new Date(this.toJSON().updated_at).getTime();
-    let comparisonTime = (now - tripTime)
-    comparisonTime = (comparisonTime / 1000) / 60;
-    console.log(comparisonTime);
+    const comparisonTime = ((now - tripTime) / 1000) / 60;
     if (this.toJSON().status == 'holding' || (this.toJSON().status == 'active' && comparisonTime <= 1.5)){
       return await this.save({status: 'canceled'},{patch: true});
     }
