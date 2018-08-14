@@ -6,10 +6,10 @@ const authToken = require('../lib/auth-token');
 const User = require('../models/user');
 const Trip = require('../models/trip');
 const helpers = require('../lib/helpers');
+const firebase = require('../firebase');
 
 /* GET users listing. */
 router.get('/', async(req, res, next) => {
-  res.io.emit('socketToMe', 'users');
   let users = await new User().fetchAll();
   res.status(200).json(users.toJSON());
 });
@@ -28,7 +28,7 @@ router.post('/signup', async (req, res, next) => {
     res.status(201).json({ jwt: token });
   }
   else
-    res.status(422).json({errors: [{message: 'No se pudo crear el Usuario'}]})
+    res.status(422).json({errors: ['No se pudo crear el Usuario']});
 });
 
 router.post('/login', async (req, res, next) => {
@@ -48,11 +48,11 @@ router.post('/login', async (req, res, next) => {
       res.status(200).json({ jwt: token });
     }
     else {
-      res.status(422).json({errors: [{message: 'El email o la contraseña son incorrectos'}]});
+      res.status(422).json({errors: ['El email o la contraseña son incorrectos']});
     }
   }
   else {
-    res.status(422).json({errors: [{message: 'El email o la contraseña son incorrectos'}]});
+    res.status(422).json({errors: ['El email o la contraseña son incorrectos']});
   }
 });
 
@@ -67,7 +67,7 @@ router.get('/active_trip', helpers.requireAuthentication, async (req, res, next)
       res.status(200).json({active: false});
   }
   else
-    res.status(404).json({errors: [{message: 'No se pudo encontrar un Usuario'}]});
+    res.status(404).json({errors: ['No se pudo encontrar un Usuario']});
 });
 
 router.get('/missing_rates', helpers.requireAuthentication, async (req, res, next) => {
@@ -78,7 +78,7 @@ router.get('/missing_rates', helpers.requireAuthentication, async (req, res, nex
     res.status(200).json(trips.toJSON());
   }
   else
-    res.status(404).json({errors: [{message: 'No se pudo encontrar un Usuario'}]});
+    res.status(404).json({errors: ['No se pudo encontrar un Usuario']});
 });
 
 router.put('/set_rate', helpers.requireAuthentication, async (req, res, next) => {
@@ -92,27 +92,38 @@ router.put('/set_rate', helpers.requireAuthentication, async (req, res, next) =>
       res.status(200).json(trip.toJSON());
     }
     else
-      res.status(422).json({errors: {message: 'No se pudo actualizar el rate del Viaje'}})
+      res.status(422).json({errors:['No se pudo actualizar el rate del Viaje']});
   }
   else
-    res.status(404).json({errors: {message: 'No se pudo encontrar el Viaje'}});
+    res.status(404).json({errors:['No se pudo encontrar el Viaje']});
 });
 
-router.put('/cancel_trip/:id', async (req, res, next) => {
-  let id = req.params.id;
-  let trip = await new Trip({id}).fetch();
-  if (trip){
-    trip = await trip.save({status: 'canceled'},{patch: true});
-    if (trip.toJSON().status == 'canceled'){
-      trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle']});
-      res.io.in('drivers').emit('deleteTrip', { trip_id: trip.toJSON().id });
-      res.status(200).json(trip.toJSON());
+router.put('/cancel_trip', helpers.requireAuthentication, async (req, res, next) => {
+  let user_id = req.user.id;
+  let user = await new User({id: user_id}).fetch();
+  if (user){
+    let trip = await user.activeTrip();
+    if (trip) {
+      trip = await trip.save({status: 'canceled'},{patch: true});
+      if (trip.toJSON().status == 'canceled'){
+        trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle']});
+
+        firebase
+          .database()
+          .ref('server/holding_trips/')
+          .child(trip.toJSON().id)
+          .remove();
+
+        res.status(200).json(trip.toJSON());
+      }
+      else
+        res.status(422).json({errors: ['No se pudo actualizar el status del Viaje']});
     }
     else
-      res.status(422).json({errors: {message: 'No se pudo actualizar el status del Viaje'}});
+      res.status(404).json({errors: ['El usuario no tiene ningun trip activo']});
   }
   else
-    res.status(404).json({errors: {message: 'No se pudo encontrar el Viaje'}});
+    res.status(404).json({errors: ['No se pudo encontrar el Usuario']});
 });
 
 module.exports = router;

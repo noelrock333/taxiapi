@@ -9,6 +9,8 @@ const Driver = require('../models/driver');
 const Vehicle = require('../models/vehicle');
 const Trip = require('../models/trip');
 const driverValidation = require('../validations/models/driver');
+const firebase = require('../firebase');
+const { upload } = require('../multer');
 
 router.get('/', async (req, res, next) => {
   const drivers = await new Driver().fetchAll({withRelated: ['vehicle', 'user']});
@@ -26,7 +28,7 @@ router.get('/active_trip', helpers.requireAuthentication, async (req, res, next)
       res.status(200).json({active: false});
   }
   else
-    res.status(404).json({errors: {message: 'No se pudo encontrar al Conductor'}});
+    res.status(404).json({errors: ['No se pudo encontrar al Conductor']});
 });
 
 router.put('/assign_vehicle', helpers.requireAuthentication, async (req, res, next) => {
@@ -41,10 +43,10 @@ router.put('/assign_vehicle', helpers.requireAuthentication, async (req, res, ne
       res.status(200).json(driver.toJSON());
     }
     else
-      res.status(422).json({errors: {message: 'No se pudo actualizar el Conductor'}});
+      res.status(422).json({errors: [ 'No se pudo actualizar el Conductor']});
   }
   else
-    res.status(422).json({errors: {message: 'No se pudo encontrar el Conductor o el Vehículo ya esta asigando'}});
+    res.status(422).json({errors: [ 'No se pudo encontrar el Conductor o el Vehículo ya esta asigando']});
 });
 
 router.put('/quit_vehicle', helpers.requireAuthentication, async (req, res, next) => {
@@ -57,10 +59,10 @@ router.put('/quit_vehicle', helpers.requireAuthentication, async (req, res, next
       res.status(200).json(driver.toJSON());
     }
     else
-      res.status(422).json({errors: {message: 'No se pudo actualizar el Conductor'}});
+      res.status(422).json({errors: [ 'No se pudo actualizar el Conductor']});
   }
   else
-    res.status(404).json({errors: {message: 'No se pudo encontrar el Conductor'}});
+    res.status(404).json({errors: [ 'No se pudo encontrar el Conductor']});
 });
 
 router.put('/accept_trip', helpers.requireAuthentication, async (req, res, next) => {
@@ -74,15 +76,26 @@ router.put('/accept_trip', helpers.requireAuthentication, async (req, res, next)
     if (trip.toJSON().vehicle_id == vehicle_id){
       driver = await driver.save({status: 'busy'}, {patch: true});
       trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle']});
-      res.io.in('drivers').emit('tripTaken', { trip_id: trip.toJSON().id });
-      res.io.in(`user-${trip.toJSON().user_id}`).emit('tripAccepted', trip.toJSON());
+
+      firebase
+          .database()
+          .ref('server/holding_trips/')
+          .child(trip.toJSON().id)
+          .remove();
+
+      firebase
+        .database()
+        .ref('server/taken_trips/')
+        .child(trip.toJSON().id)
+        .set(trip.toJSON());
+
       res.status(200).json(trip.toJSON());
     }
     else
-      res.status(422).json({errors: {message: 'No se pudo actualizar el Viaje'}});
+      res.status(422).json({errors: [ 'No se pudo actualizar el Viaje']});
   }
   else
-    res.status(422).json({errors: {message: 'No se pudo encontrar el Viaje o el Conductor no tiene Vehículo asignado'}});
+    res.status(422).json({errors: [ 'No se pudo encontrar el Viaje o el Conductor no tiene Vehículo asignado']});
 });
 
 // router.put('/start_trip', helpers.requireAuthentication,async (req, res, next) => {
@@ -97,14 +110,14 @@ router.put('/accept_trip', helpers.requireAuthentication, async (req, res, next)
 //         res.status(200).json(trip.toJSON());
 //       }
 //       else
-//         res.status(422).json({errors: {message: 'No se pudo actualizar el Viaje'}});
+//         res.status(422).json({errors: [ 'No se pudo actualizar el Viaje']});
 //     }
 //     else {
-//       res.status(422).json({errors: {message: 'El Conductor no puede iniciar el viaje si no lo ha tomado'}});
+//       res.status(422).json({errors: [ 'El Conductor no puede iniciar el viaje si no lo ha tomado']});
 //     }
 //   }
 //   else
-//     res.status(404).json({errors: {message: 'No se pudo encontrar el Conductor'}});
+//     res.status(404).json({errors: [ 'No se pudo encontrar el Conductor']});
 // });
 
 router.put('/finish_trip', helpers.requireAuthentication, async (req, res, next) => {
@@ -118,16 +131,24 @@ router.put('/finish_trip', helpers.requireAuthentication, async (req, res, next)
         let driver = await new Driver({id: trip.toJSON().driver_id}).fetch();
         driver = await driver.save({status: 'free'}, {patch: true});
         trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle']});
+
+        firebase
+          .database()
+          .ref('server/taken_trips/')
+          .child(trip.toJSON().id)
+          .remove();
+
+        res.io.in(`user-${trip.toJSON().user.id}`).emit('finishedTrip', trip.toJSON());
         res.status(200).json(trip.toJSON());
       }
       else
-        res.status(422).json({errors: {message: 'No se pudo actualizar el estado del Viaje'}});
+        res.status(422).json({errors: [ 'No se pudo actualizar el estado del Viaje' ]});
     }else {
-      res.status(422).json({errors: {message: 'El Conductor no puede finalizar el viaje si no lo ha iniciado'}})
+      res.status(422).json({errors: [ 'El Conductor no puede finalizar el viaje si no lo ha iniciado' ]});
     }
   }
   else
-    res.status(422).json({errors: {message: 'No se pudo encontrar el Viaje o el Conductor no tiene Vehículo asignado'}});
+    res.status(422).json({errors: [ 'No se pudo encontrar el Viaje o el Conductor no tiene Vehículo asignado']});
 });
 
 router.put('/cancel_trip', helpers.requireAuthentication, async (req, res, next) => {
@@ -139,28 +160,44 @@ router.put('/cancel_trip', helpers.requireAuthentication, async (req, res, next)
       if (trip.toJSON().status == 'holding'){
         driver = await new Driver({id: driver.id}).save({status: 'free'}, {patch: true});
         trip = await trip.fetch({withRelated: ['user']});
-        res.io.in(`user-${trip.toJSON().user_id}`).emit('tripCanceled');
-        res.io.in('drivers').emit('newTrip', trip.toJSON());
+
+        firebase
+          .database()
+          .ref('server/taken_trips/')
+          .child(trip.toJSON().id)
+          .remove();
+
+        firebase
+          .database()
+          .ref('server/holding_trips/')
+          .child(trip.toJSON().id)
+          .set({...trip.toJSON(), timestamp: new Date(trip.toJSON().created_at)});
+
         res.status(200).json(trip.toJSON());
       }
       else
-        res.status(422).json({errors: {message: 'No se puso cancelar el Viaje'}});
+        res.status(422).json({errors: [ 'No se puso cancelar el Viaje']});
     }
     else
-      res.status(422).json({errors: {message: 'El conductor no tiene un Viaje activo'}});
+      res.status(422).json({errors: [ 'El conductor no tiene un Viaje activo']});
   }
   else
-    res.status(422).json({errors: {message: 'Necesitas estar loggeado como conductor'}});
+    res.status(422).json({errors: [ 'Necesitas estar loggeado como conductor']});
 });
 
-router.post('/signup', driverValidation.validate, async (req, res, next) => {
+router.post('/signup', upload.single('public_service_permission_image'), driverValidation.validate,  async (req, res, next) => {
   const {full_name, email, password, license_number, status = 'free' } = req.body;
   let password_hash = SHA256(password).toString();
 
   let user = await new User({ full_name, email, password_hash }).save();
   if (user) {
     let user_id = user.get('id');
-    let driver = await new Driver({ license_number, status, user_id }).save();
+    let driver = await new Driver({
+      license_number,
+      status,
+      user_id,
+      public_service_permission_image: req.file.path
+    }).save();
     if (driver){
       driver = await driver.fetch({withRelated: ['vehicle', 'user']});
       driver = driver.toJSON();
@@ -173,11 +210,11 @@ router.post('/signup', driverValidation.validate, async (req, res, next) => {
     }
     else{
       user = await new User({id: user_id}).destroy();
-      res.status(422).json({errors: {message: 'No se pudo crear el conductor'}});
+      res.status(422).json({errors: [ 'No se pudo crear el conductor']});
     }
   }
   else
-    res.status(422).json({errors: {message: 'No se pudo crear el conductor'}});
+    res.status(422).json({errors: [ 'No se pudo crear el conductor']});
 });
 
 router.post('/login', async (req, res, next) => {
@@ -199,15 +236,15 @@ router.post('/login', async (req, res, next) => {
         res.status(200).json({ jwt: token });
       }
       else{
-        res.status(422).json({errors: [{message: 'El usuario no es Conductor'}]});
+        res.status(422).json({errors: [ 'El usuario no es Conductor']});
       }
     }
     else {
-      res.status(422).json({errors: [{message: 'El email o la contraseña son incorrectos'}]});
+      res.status(422).json({errors: [ 'El email o la contraseña son incorrectos']});
     }
   }
   else {
-    res.status(422).json({errors: [{message: 'El email o la contraseña son incorrectos'}]});
+    res.status(422).json({errors: [ 'El email o la contraseña son incorrectos']});
   }
 });
 

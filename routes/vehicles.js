@@ -26,7 +26,7 @@ router.post('/', vehicleValidation.validate, helpers.requireAuthentication, asyn
     }
   }
   else
-    res.status(422).json({errors: {message: 'No se pudo crear el Vehículo'}});
+    res.status(422).json({errors:['No se pudo crear el Vehículo']});
 });
 
 router.get('/:id', async (req, res, next) => {
@@ -35,7 +35,7 @@ router.get('/:id', async (req, res, next) => {
   if (vehicle)
     res.status(200).json(vehicle.toJSON());
   else
-    res.status(404).json({ errors: { message: 'No se pudo encontrar el Vehículo' }});
+    res.status(404).json({ errors: ['No se pudo encontrar el Vehículo']});
 });
 
 router.put('/:id', vehicleValidation.validate, async (req, res, next) => {
@@ -48,7 +48,7 @@ router.put('/:id', vehicleValidation.validate, async (req, res, next) => {
     res.status(200).json(vehicle.toJSON());
   }
   else
-    res.status(404).json({errors: {message: 'No se pudo encontrar el Vehículo para actualizar'}});
+    res.status(404).json({ errors:['No se pudo encontrar el Vehículo para actualizar']});
 });
 
 router.delete('/:id', async (req, res, next) => {
@@ -57,12 +57,12 @@ router.delete('/:id', async (req, res, next) => {
   if (vehicle){
     vehicle = await vehicle.destroy();
     if (vehicle && (typeof vehicle.get('id') === 'undefined'))
-      res.status(200).json({flash: {message: 'Vehículo elimnado con éxito'}});
+      res.status(200).json({flash: ['Vehículo elimnado con éxito']});
     else
-      res.status(422).json({errors: {message: 'No se pudo eliminar el Vehículo'}});
+      res.status(422).json({errors: ['No se pudo eliminar el Vehículo']});
   }
   else
-    res.status(404).json({errors: {message: 'No se pudo encontrar el Vehículo'}});
+    res.status(404).json({errors: ['No se pudo encontrar el Vehículo']});
 });
 
 module.exports = router;
