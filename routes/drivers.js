@@ -17,6 +17,16 @@ router.get('/', async (req, res, next) => {
   res.status(200).json(drivers.toJSON());
 });
 
+router.get('/profile', helpers.requireAuthentication, async (req, res, next) => {
+  let driver_id = req.driver.id;
+  let driver = await new Driver({id: driver_id}).fetch({withRelated: ['vehicle', 'user']});
+  if (driver) {
+    res.status(200).json(driver.toJSON());
+  }
+  else
+    res.status(404).json({errors: ['No se pudo encontrar al Conductor']});
+});
+
 router.get('/active_trip', helpers.requireAuthentication, async (req, res, next) => {
   let driver_id = req.driver.id;
   let driver = await new Driver({id: driver_id}).fetch();
