@@ -14,6 +14,12 @@ const Trip = bookshelf.Model.extend({
   vehicle: function(){
     const Vehicle = require('./vehicle');
     return this.belongsTo(Vehicle)
+  },
+  holdingTrips: function(){
+    return this.where({status: 'holding'}).fetchAll();
+  },
+  takenTrips: function(){
+    return this.where({status: 'active'}).fetchAll();
   }
 });
 
