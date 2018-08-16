@@ -138,6 +138,12 @@ router.put('/finish_trip', helpers.requireAuthentication, async (req, res, next)
           .child(trip.toJSON().id)
           .remove();
 
+        firebase
+          .database()
+          .ref('server/finished_trips/')
+          .child(trip.toJSON().id)
+          .set(trip.toJSON());
+
         res.io.in(`user-${trip.toJSON().user.id}`).emit('finishedTrip', trip.toJSON());
         res.status(200).json(trip.toJSON());
       }
