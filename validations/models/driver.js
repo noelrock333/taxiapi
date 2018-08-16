@@ -26,6 +26,13 @@ function validateDriver(attributes) {
         'free',
         'busy'
       ]
+    },
+    public_service_permission_image: {
+      presence: {allowEmpty: false}
+    },
+    phone_number: {
+      presence: {allowEmpty: false},
+      length: { minimum: 10}
     }
   };
 

@@ -201,8 +201,16 @@ router.put('/cancel_trip', helpers.requireAuthentication, async (req, res, next)
     res.status(422).json({errors: [ 'Necesitas estar loggeado como conductor']});
 });
 
-router.post('/signup', upload.single('public_service_permission_image'), driverValidation.validate,  async (req, res, next) => {
-  const {full_name, email, password, license_number, status = 'free' } = req.body;
+router.post('/signup', driverValidation.validate,  async (req, res, next) => {
+  const {
+    full_name,
+    email,
+    password,
+    license_number,
+    status = 'free',
+    public_service_permission_image,
+    phone_number
+  } = req.body;
   let password_hash = SHA256(password).toString();
 
   let user = await new User({ full_name, email, password_hash }).save();
@@ -212,7 +220,8 @@ router.post('/signup', upload.single('public_service_permission_image'), driverV
       license_number,
       status,
       user_id,
-      public_service_permission_image: req.file.path
+      public_service_permission_image,
+      phone_number
     }).save();
     if (driver){
       driver = await driver.fetch({withRelated: ['vehicle', 'user']});
@@ -268,6 +277,32 @@ router.post('/trips_in_range', helpers.requireAuthentication, async (req, res, n
   let {lat, lng} = req.body;
   let trips = await new Driver().tripsInRange(lat,lng);
   res.status(200).json(trips);
+});
+
+router.post('/upload_profile_image', upload.single('profile_image'), helpers.requireAuthentication, async (req, res, next) => {
+  res.status(200).json({image: req.file.path });
+});
+
+router.post('/upload_permission_image', upload.single('public_service_permission_image'), helpers.requireAuthentication, async (req, res, next) => {
+  res.status(200).json({image: req.file.path });
+});
+
+router.put('/change_image_profile', helpers.requireAuthentication, async (req, res, next) => {
+  const profile_image = req.body.profile_image;
+  const driver_id = req.driver.id;
+  if (profile_image) {
+    let driver = await new Driver({id: driver_id}).save({profile_image}, {patch: true});
+    if (driver.toJSON().profile_image == profile_image) {
+      driver = await driver.fetch({withRelated: ['vehicle.organization']});
+      res.status(200).json(driver.toJSON());
+    }
+    else{
+      res.status(422).json({errors: ['No se pudo actualizar la imagen de perfil']})
+    }
+  }
+  else {
+    res.status(422).json({errors: ['La imagen es requerida']});
+  }
 });
 
 module.exports = router;
