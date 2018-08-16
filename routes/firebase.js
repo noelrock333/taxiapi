@@ -36,6 +36,11 @@ router.post('/sync', async (req, res, next) => {
         .set(trip);
     }
 
+  firebase
+    .database()
+    .ref('server/finished_trips/')
+    .remove();
+
   res.status(200).json({message: 'Firebase Real Time DB Updated'});
 });
 
