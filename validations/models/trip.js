@@ -18,6 +18,16 @@ function validateTrip(attributes) {
 
 module.exports = {
   validate: (req, res, next) => {
-    return validateTrip(req.body).then(() => next(), err => res.status(422).json({errors: err}))
+    return validateTrip(req.body).then(() => {
+      return next()
+    }, err => {
+      const errors = {
+        errors: Object.keys(err).reduce((previousValue, key) => {
+          return [...previousValue, ...err[key]]
+        }, [])
+      }
+
+      return res.status(422).json(errors);
+    })
   }
 }

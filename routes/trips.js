@@ -24,7 +24,7 @@ router.post('/', helpers.requireAuthentication, validateTrip.validate, async (re
   let user_trip = await user.activeTrip();
 
   if (user_trip)
-    return res.status(422).json({errors: {message: 'El usuario ya tiene un Viaje activo'}});
+    return res.status(422).json({errors: ['El usuario ya tiene un Viaje activo']});
 
   let trip = await new Trip({
     address_origin,
@@ -46,18 +46,7 @@ router.post('/', helpers.requireAuthentication, validateTrip.validate, async (re
     res.status(201).json(trip.toJSON());
   }
   else
-    res.status(422).json({errors: {message: 'No se pudo crear el viaje'}});
-});
-
-router.get('/:id', helpers.requireAuthentication, async (req, res, next) => {
-  const id = req.params.id;
-  let trip = await new Trip({id}).fetch({withRelated: ['user', 'driver.user','vehicle']});
-  if (trip) {
-    res.status(200).json(trip.toJSON());
-  }
-  else {
-    res.status(404).json({errors: {message: 'No se pudo encontrar ningun viaje'}});
-  }
+    res.status(422).json({errors: ['No se pudo crear el viaje']});
 });
 
 module.exports = router;
