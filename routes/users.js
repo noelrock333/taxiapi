@@ -14,6 +14,17 @@ router.get('/', async(req, res, next) => {
   res.status(200).json(users.toJSON());
 });
 
+router.get('/profile', helpers.requireAuthentication, async (req, res, next) => {
+  let user_id = req.user.id;
+  let user = await new User({id: user_id}).fetch();
+  if (user) {
+    res.status(200).json(user.toJSON());
+  }
+  else
+    res.status(404).json({errors: ['No se pudo encontrar al Usuario']});
+});
+
+
 router.post('/signup', async (req, res, next) => {
   let { email, password, full_name } = req.body;
   var password_hash = SHA256(`${password}`).toString();
