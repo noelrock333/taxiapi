@@ -49,15 +49,4 @@ router.post('/', helpers.requireAuthentication, validateTrip.validate, async (re
     res.status(422).json({errors: ['No se pudo crear el viaje']});
 });
 
-router.get('/:id', helpers.requireAuthentication, async (req, res, next) => {
-  const id = req.params.id;
-  let trip = await new Trip({id}).fetch({withRelated: ['user', 'driver.user','vehicle']});
-  if (trip) {
-    res.status(200).json(trip.toJSON());
-  }
-  else {
-    res.status(404).json({errors: ['No se pudo encontrar ningun viaje']});
-  }
-});
-
 module.exports = router;
