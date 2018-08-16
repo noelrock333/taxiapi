@@ -16,6 +16,7 @@ var driversRouter = require('./routes/drivers');
 var vehiclesRouter = require('./routes/vehicles');
 var serviceTypesRouter = require('./routes/service_types');
 var organizationsRouter = require('./routes/organizations');
+var firebaseRouter = require('./routes/firebase');
 
 var app = express();
 var server = require('http').Server(app);
@@ -44,6 +45,7 @@ app.use('/api/drivers', driversRouter);
 app.use('/api/vehicles', vehiclesRouter);
 app.use('/api/service_types', serviceTypesRouter);
 app.use('/api/organizations', organizationsRouter);
+app.use('/api/firebase', firebaseRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
