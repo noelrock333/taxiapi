@@ -23,6 +23,12 @@ const Trip = bookshelf.Model.extend({
       return await this.save({status: 'canceled'},{patch: true});
     }
     return this
+  },
+  holdingTrips: function(){
+    return this.where({status: 'holding'}).fetchAll();
+  },
+  takenTrips: function(){
+    return this.where({status: 'active'}).fetchAll();
   }
 });
 

@@ -16,7 +16,7 @@ router.post('/', serviceTypeValidation.validate, async (req, res, next) => {
   if (service)
     res.status(201).json(service.toJSON());
   else
-    res.status(422).json({errors: {message: 'No se pudo crear el Servicio'}});
+    res.status(422).json({errors: ['No se pudo crear el Servicio']});
 });
 
 router.delete('/:id', async (req, res, next) => {
@@ -25,12 +25,12 @@ router.delete('/:id', async (req, res, next) => {
   if (service){
     service = await service.destroy();
     if (service && typeof service.get('id') === 'undefined')
-      res.status(200).json({flash: {message: 'Servicio elimnado con exito'}});
+      res.status(200).json({flash: ['Servicio elimnado con exito']});
     else
-      res.status(422).json({errors: {message: 'No se pudo eliminar el servicio'}});
+      res.status(422).json({errors: ['No se pudo eliminar el servicio']});
   }
   else
-    res.status(404).json({errors: {message: 'No se pudo encontrar el servicio para eliminar'}})
+    res.status(404).json({errors: ['No se pudo encontrar el servicio para eliminar']});
 })
 
 module.exports = router;

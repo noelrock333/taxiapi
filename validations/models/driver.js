@@ -26,6 +26,13 @@ function validateDriver(attributes) {
         'free',
         'busy'
       ]
+    },
+    public_service_permission_image: {
+      presence: {allowEmpty: false}
+    },
+    phone_number: {
+      presence: {allowEmpty: false},
+      length: { minimum: 10}
     }
   };
 
@@ -34,6 +41,16 @@ function validateDriver(attributes) {
 
 module.exports = {
   validate: (req, res, next) => {
-    return validateDriver(req.body).then(() => next(), err => res.status(422).json({errors: err}))
+    return validateDriver(req.body).then(() => {
+      return next()
+    }, err => {
+      const errors = {
+        errors: Object.keys(err).reduce((previousValue, key) => {
+          return [...previousValue, ...err[key]]
+        }, [])
+      }
+
+      return res.status(422).json(errors);
+    })
   }
 }

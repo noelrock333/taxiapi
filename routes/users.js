@@ -14,6 +14,17 @@ router.get('/', async(req, res, next) => {
   res.status(200).json(users.toJSON());
 });
 
+router.get('/profile', helpers.requireAuthentication, async (req, res, next) => {
+  let user_id = req.user.id;
+  let user = await new User({id: user_id}).fetch();
+  if (user) {
+    res.status(200).json(user.toJSON());
+  }
+  else
+    res.status(404).json({errors: ['No se pudo encontrar al Usuario']});
+});
+
+
 router.post('/signup', async (req, res, next) => {
   let { email, password, full_name } = req.body;
   var password_hash = SHA256(`${password}`).toString();
@@ -28,7 +39,7 @@ router.post('/signup', async (req, res, next) => {
     res.status(201).json({ jwt: token });
   }
   else
-    res.status(422).json({errors: [{message: 'No se pudo crear el Usuario'}]})
+    res.status(422).json({errors: ['No se pudo crear el Usuario']});
 });
 
 router.post('/login', async (req, res, next) => {
@@ -48,11 +59,11 @@ router.post('/login', async (req, res, next) => {
       res.status(200).json({ jwt: token });
     }
     else {
-      res.status(422).json({errors: [{message: 'El email o la contraseña son incorrectos'}]});
+      res.status(422).json({errors: ['El email o la contraseña son incorrectos']});
     }
   }
   else {
-    res.status(422).json({errors: [{message: 'El email o la contraseña son incorrectos'}]});
+    res.status(422).json({errors: ['El email o la contraseña son incorrectos']});
   }
 });
 
@@ -67,7 +78,7 @@ router.get('/active_trip', helpers.requireAuthentication, async (req, res, next)
       res.status(200).json({active: false});
   }
   else
-    res.status(404).json({errors: [{message: 'No se pudo encontrar un Usuario'}]});
+    res.status(404).json({errors: ['No se pudo encontrar un Usuario']});
 });
 
 router.get('/missing_rates', helpers.requireAuthentication, async (req, res, next) => {
@@ -78,7 +89,7 @@ router.get('/missing_rates', helpers.requireAuthentication, async (req, res, nex
     res.status(200).json(trips.toJSON());
   }
   else
-    res.status(404).json({errors: [{message: 'No se pudo encontrar un Usuario'}]});
+    res.status(404).json({errors: ['No se pudo encontrar un Usuario']});
 });
 
 router.put('/set_rate', helpers.requireAuthentication, async (req, res, next) => {
@@ -92,10 +103,10 @@ router.put('/set_rate', helpers.requireAuthentication, async (req, res, next) =>
       res.status(200).json(trip.toJSON());
     }
     else
-      res.status(422).json({errors: {message: 'No se pudo actualizar el rate del Viaje'}})
+      res.status(422).json({errors:['No se pudo actualizar el rate del Viaje']});
   }
   else
-    res.status(404).json({errors: {message: 'No se pudo encontrar el Viaje'}});
+    res.status(404).json({errors:['No se pudo encontrar el Viaje']});
 });
 
 router.put('/cancel_trip', helpers.requireAuthentication, async (req, res, next) => {
@@ -123,13 +134,13 @@ router.put('/cancel_trip', helpers.requireAuthentication, async (req, res, next)
         res.status(200).json(trip.toJSON());
       }
       else
-        res.status(422).json({errors: {message: 'No se pudo actualizar el status del Viaje'}});
+        res.status(422).json({errors: ['No se pudo actualizar el status del Viaje']});
     }
     else
-      res.status(404).json({errors: {message: 'El usuario no tiene ningun trip activo'}});
+      res.status(404).json({errors: ['El usuario no tiene ningun trip activo']});
   }
   else
-    res.status(404).json({errors: {message: 'No se pudo encontrar el Usuario'}});
+    res.status(404).json({errors: ['No se pudo encontrar el Usuario']});
 });
 
 module.exports = router;
