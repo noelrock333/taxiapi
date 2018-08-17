@@ -283,7 +283,7 @@ router.post('/upload_profile_image', upload.single('profile_image'), helpers.req
   res.status(200).json({image: req.file.path });
 });
 
-router.post('/upload_permission_image', upload.single('public_service_permission_image'), helpers.requireAuthentication, async (req, res, next) => {
+router.post('/upload_permission_image', upload.single('public_service_permission_image'), async (req, res, next) => {
   res.status(200).json({image: req.file.path });
 });
 
