@@ -284,6 +284,7 @@ router.post('/upload_profile_image', upload.single('profile_image'), helpers.req
 });
 
 router.post('/upload_permission_image', upload.single('public_service_permission_image'), async (req, res, next) => {
+  console.log(req.file);
   res.status(200).json({image: req.file.path });
 });
 
