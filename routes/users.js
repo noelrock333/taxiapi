@@ -7,6 +7,7 @@ const User = require('../models/user');
 const Trip = require('../models/trip');
 const helpers = require('../lib/helpers');
 const firebase = require('../firebase');
+const sgMail = require('../sengrid');
 
 /* GET users listing. */
 router.get('/', async(req, res, next) => {
