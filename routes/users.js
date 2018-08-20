@@ -25,6 +25,17 @@ router.get('/profile', helpers.requireAuthentication, async (req, res, next) => 
     res.status(404).json({errors: ['No se pudo encontrar al Usuario']});
 });
 
+router.put('/profile', helpers.requireAuthentication, async (req, res, next) => {
+  const user_id = req.user.id;
+  let user = await new User({id: user_id}).fetch();
+  if (user) {
+    user = await user.save(req.body,{patch: true});
+    user = await user.fetch();
+    res.status(200).json(user.toJSON());
+  }
+  else
+    res.status(404).json({errors: ['No se pudo encontrar al Conductor']});
+});
 
 router.post('/signup', async (req, res, next) => {
   let { email, password, full_name } = req.body;

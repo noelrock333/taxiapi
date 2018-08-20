@@ -13,14 +13,26 @@ const firebase = require('../firebase');
 const { upload } = require('../multer');
 
 router.get('/', async (req, res, next) => {
-  const drivers = await new Driver().fetchAll({withRelated: ['vehicle', 'user']});
+  const drivers = await new Driver().fetchAll({withRelated: ['vehicle.organization', 'user']});
   res.status(200).json(drivers.toJSON());
 });
 
 router.get('/profile', helpers.requireAuthentication, async (req, res, next) => {
   let driver_id = req.driver.id;
-  let driver = await new Driver({id: driver_id}).fetch({withRelated: ['vehicle', 'user']});
+  let driver = await new Driver({id: driver_id}).fetch({withRelated: ['vehicle.organization', 'user']});
   if (driver) {
+    res.status(200).json(driver.toJSON());
+  }
+  else
+    res.status(404).json({errors: ['No se pudo encontrar al Conductor']});
+});
+
+router.put('/profile', helpers.requireAuthentication, async (req, res, next) => {
+  const driver_id = req.driver.id;
+  let driver = await new Driver({id: driver_id}).fetch({withRelated: ['vehicle.organization', 'user']});
+  if (driver) {
+    driver = await driver.save(req.body,{patch: true});
+    driver = await driver.fetch({withRelated: ['vehicle.organization', 'user']});
     res.status(200).json(driver.toJSON());
   }
   else
@@ -49,7 +61,7 @@ router.put('/assign_vehicle', helpers.requireAuthentication, async (req, res, ne
   if (vehicle && driver) {
     driver = await driver.save({vehicle_id}, {patch: true});
     if (driver.toJSON().vehicle_id == vehicle_id){
-      driver = await driver.fetch({withRelated: ['vehicle', 'user']});
+      driver = await driver.fetch({withRelated: ['vehicle.organization', 'user']});
       res.status(200).json(driver.toJSON());
     }
     else
@@ -65,7 +77,7 @@ router.put('/quit_vehicle', helpers.requireAuthentication, async (req, res, next
   if (driver) {
     driver = await driver.save({vehicle_id: null}, {patch: true});
     if (driver.toJSON().vehicle_id == null){
-      driver = await driver.fetch({withRelated: ['vehicle', 'user']});
+      driver = await driver.fetch({withRelated: ['vehicle.organization', 'user']});
       res.status(200).json(driver.toJSON());
     }
     else
@@ -85,7 +97,7 @@ router.put('/accept_trip', helpers.requireAuthentication, async (req, res, next)
     trip = await trip.save({ status: 'active', driver_id, vehicle_id}, {patch: true});
     if (trip.toJSON().vehicle_id == vehicle_id){
       driver = await driver.save({status: 'busy'}, {patch: true});
-      trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle']});
+      trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle.organization']});
 
       firebase
           .database()
@@ -140,7 +152,7 @@ router.put('/finish_trip', helpers.requireAuthentication, async (req, res, next)
       if (trip.toJSON().status == 'finished'){
         let driver = await new Driver({id: trip.toJSON().driver_id}).fetch();
         driver = await driver.save({status: 'free'}, {patch: true});
-        trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle']});
+        trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle.organization']});
 
         firebase
           .database()
