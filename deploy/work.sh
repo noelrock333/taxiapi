@@ -26,4 +26,5 @@ npm install --production
 npm prune --production
 
 #restart server
-pm2 restart taxiapi
+pm2 stop taxiapi
+pm2 start ecosystem.config.js --env production
