@@ -4,6 +4,7 @@ const authToken = require('../lib/auth-token');
 const helpers = require('../lib/helpers');
 const User = require('../models/user');
 const Driver = require('../models/driver');
+const Organization = require('../models/organization');
 
 // User routes
 
@@ -19,7 +20,7 @@ router.get('/user/:id', async (req, res, next) => {
     res.status(200).json(user.toJSON());
   }
   else {
-    res.status(404).json({errors: ['Este usuario no existe']});
+    res.status(404).json({errors: ['Este Usuario no existe']});
   }
 });
 
@@ -31,7 +32,7 @@ router.put('/user/:id', async (req, res, next) => {
     res.status(200).json(user.toJSON());
   }
   else {
-    res.status(404).json({errors: ['Este usuario no existe']});
+    res.status(404).json({errors: ['Este Usuario no existe']});
   }
 });
 
@@ -41,18 +42,18 @@ router.delete('/user/:id', async (req, res, next) => {
   if(user) {
     try {
       user = await user.destroy();
-      res.status(200).json({flash: ['Usuario borrado exitosamente']});
+      res.status(200).json({flash: ['Usuario eliminado exitosamente']});
     }
     catch (error){
       switch (error.code){
         case '23503':
-        res.status(400).json({errors: ['Este usuario esta referenciado en otra tabla']});
+        res.status(400).json({errors: ['Este Usuario esta referenciado en otra tabla']});
         break;
       }
     }
   }
   else {
-    res.status(404).json({errors: ['Este usuario no existe']});
+    res.status(404).json({errors: ['Este Usuario no existe']});
   }
 });
 
@@ -70,7 +71,7 @@ router.get('/driver/:id', async (req, res, next) => {
     res.status(200).json(driver.toJSON());
   }
   else {
-    res.status(404).json({errors: ['Este usuario no existe']});
+    res.status(404).json({errors: ['Este Conductor no existe']});
   }
 });
 
@@ -82,7 +83,7 @@ router.put('/driver/:id', async (req, res, next) => {
     res.status(200).json(driver.toJSON());
   }
   else {
-    res.status(404).json({errors: ['Este usuario no existe']});
+    res.status(404).json({errors: ['Este Conductor no existe']});
   }
 });
 
@@ -92,19 +93,78 @@ router.delete('/driver/:id', async (req, res, next) => {
   if(driver) {
     try {
       driver = await driver.destroy();
-      res.status(200).json({flash: ['Usuario borrado exitosamente']});
+      res.status(200).json({flash: ['Conductor eliminado exitosamente']});
     }
     catch (error){
       switch (error.code){
         case '23503':
-        res.status(400).json({errors: ['Este usuario esta referenciado en otra tabla']});
+        res.status(400).json({errors: ['Este Conductor esta referenciado en otra tabla']});
         break;
       }
     }
   }
   else {
-    res.status(404).json({errors: ['Este usuario no existe']});
+    res.status(404).json({errors: ['Este Conductor no existe']});
   }
+});
+
+// Organization routes
+
+router.get('/organizations', async (req, res, next) => {
+  const organizations = await new Organization().fetchAll();
+  res.status(200).json(organizations.toJSON());
+})
+
+router.post('/organizations', async (req, res, next) => {
+  const name = req.body.name
+  const organization = await new Organization({ name }).save();
+  if (organization)
+    res.status(201).json(organization.toJSON());
+  else
+    res.status(422).json({errors: ['No se pudo crear la Organización']});
+});
+
+router.get('/organization/:id', async (req, res, next) => {
+  const organization_id = req.params.id;
+  const organization = await new Organization({id: organization_id}).fetch();
+  if (organization) {
+    res.status(200).json(organization.toJSON());
+  }
+  else {
+    res.status(404).json({errors: ['Esta Organización no existe']});
+  }
+});
+
+router.put('/organization/:id', async (req, res, next) => {
+  const organization_id = req.params.id;
+  let organization = await new Organization({id: organization_id}).fetch();
+  if (organization) {
+    organization = await organization.save(req.body, {patch: true});
+    res.status(200).json(organization.toJSON());
+  }
+  else {
+    res.status(404).json({errors: ['Esta Organización no existe']});
+  }
+});
+
+router.delete('/organization/:id', async (req, res, next) => {
+  const organization_id = req.params.id
+  let organization = await new Organization({id: organization_id}).fetch();
+  if (organization){
+    try {
+      organization = await new Organization({id: organization_id}).destroy();
+      res.status(200).json({flash: ['Organizción elimnada con exito']});
+    }
+    catch(error) {
+      switch (error.code){
+        case '23503':
+        res.status(400).json({errors: ['Esta Organización esta referenciada en otra tabla']});
+        break;
+      }
+    }
+  }
+  else
+    res.status(404).json({errors: ['Esta Organización no existe']});
 });
 
 module.exports = router;
