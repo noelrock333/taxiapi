@@ -5,6 +5,7 @@ const helpers = require('../lib/helpers');
 const User = require('../models/user');
 const Driver = require('../models/driver');
 const Organization = require('../models/organization');
+const ServiceType = require('../models/service_type');
 
 // User routes
 
@@ -165,6 +166,52 @@ router.delete('/organization/:id', async (req, res, next) => {
   }
   else
     res.status(404).json({errors: ['Esta Organización no existe']});
+});
+
+//Service_types_routes
+
+router.get('/services', async (req, res, next) => {
+  const services = await new ServiceType().fetchAll();
+  res.status(200).json(services.toJSON());
+});
+
+router.post('/services', async (req, res, next) => {
+  const name = req.body.name;
+  const service = await new ServiceType({ name }).save();
+  if (service)
+    res.status(201).json(service.toJSON());
+  else
+    res.status(422).json({errors: ['No se pudo crear el Servicio']});
+});
+
+router.put('/service/:id', async (req, res, next) => {
+  const service_id = req.params.id;
+  let service = await new ServiceType({id: service_id}).fetch();
+  if (service) {
+    service = await service.save(req.body, {patch: true});
+    res.status(200).json(service.toJSON());
+  }
+  else {
+    res.status(422).json({errors: ['Este Servicio no existe']});
+  }
+});
+
+router.delete('/service/:id', async (req, res, next) => {
+  const service_id = req.params.id;
+  let service = await new ServiceType({id: service_id}).fetch();
+  if (service){
+    try {
+      service = await service.destroy();
+      res.status(200).json({flash: ['Servicio eliminado con exito']});
+    }
+    catch(error) {
+      switch (error.code){
+        case '23503':
+        res.status(400).json({errors: ['Esta Servicio esta referenciada en otra tabla']});
+        break;
+      }
+    }
+  }
 });
 
 module.exports = router;
