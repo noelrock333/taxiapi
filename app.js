@@ -16,8 +16,8 @@ var driversRouter = require('./routes/drivers');
 var vehiclesRouter = require('./routes/vehicles');
 var serviceTypesRouter = require('./routes/service_types');
 var organizationsRouter = require('./routes/organizations');
-var firebaseRouter = require('./routes/firebase');
 var passwordResetRouter = require('./routes/password_reset');
+var adminRouter = require('./routes/admin');
 
 var app = express();
 var server = require('http').Server(app);
@@ -46,7 +46,7 @@ app.use('/api/drivers', driversRouter);
 app.use('/api/vehicles', vehiclesRouter);
 app.use('/api/service_types', serviceTypesRouter);
 app.use('/api/organizations', organizationsRouter);
-app.use('/api/firebase', firebaseRouter);
+app.use('/api/admin', adminRouter);
 app.use('/password_reset', passwordResetRouter);
 
 // catch 404 and forward to error handler

@@ -1,16 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const knex = require('../knex');
 const helpers = require('../lib/helpers');
 const Trip = require('../models/trip');
 const User = require('../models/user');
 const validateTrip = require('../validations/models/trip');
 const firebase = require('../firebase');
-
-router.get('/', async (req, res, next) => {
-  const trips = await new Trip().fetchAll({withRelated: ['user', 'driver.user','vehicle']});
-  res.status(200).json(trips.toJSON());
-});
 
 router.post('/', helpers.requireAuthentication, validateTrip.validate, async (req, res, next) => {
   let {

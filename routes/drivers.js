@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const knex = require('../knex');
 const SHA256 = require('crypto-js/sha256');
 const authToken = require('../lib/auth-token');
 const helpers = require('../lib/helpers');
@@ -11,11 +10,6 @@ const Trip = require('../models/trip');
 const driverValidation = require('../validations/models/driver');
 const firebase = require('../firebase');
 const { upload } = require('../multer');
-
-router.get('/', async (req, res, next) => {
-  const drivers = await new Driver().fetchAll({withRelated: ['vehicle.organization', 'user']});
-  res.status(200).json(drivers.toJSON());
-});
 
 router.get('/profile', helpers.requireAuthentication, async (req, res, next) => {
   let driver_id = req.driver.id;
