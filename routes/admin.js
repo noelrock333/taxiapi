@@ -8,6 +8,7 @@ const Organization = require('../models/organization');
 const ServiceType = require('../models/service_type');
 const Vehicle = require('../models/vehicle');
 const Trip = require('../models/trip');
+const firebase = require('../firebase');
 
 // User routes
 
@@ -314,6 +315,7 @@ router.get('/trip/:id', async (req, res, next) => {
 router.post('/trips', async (req, res, next) => {
   try {
     const trip = await new Trip(req.body).save();
+
     res.status(201).json(trip.toJSON());
   }
   catch(error) {
@@ -343,7 +345,20 @@ router.delete('/trip/:id', async (req, res, next) => {
   let trip = await new Trip({id: trip_id}).fetch();
   if (trip) {
     try {
-      trip = await trip.destroy()
+      trip = await trip.destroy();
+
+      firebase
+        .database()
+        .ref('server/holding_trips/')
+        .child(trip_id)
+        .remove();
+
+      firebase
+        .database()
+        .ref('server/taken_trips/')
+        .child(trip_id)
+        .remove();
+
       res.status(201).json({flash: ['Viaje eliminado con exito']});
     }
     catch(error) {
