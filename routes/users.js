@@ -1,19 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const knex = require('../knex');
 const SHA256 = require('crypto-js/sha256');
 const authToken = require('../lib/auth-token');
 const User = require('../models/user');
 const Trip = require('../models/trip');
 const helpers = require('../lib/helpers');
 const firebase = require('../firebase');
-const sgMail = require('../sengrid');
-
-/* GET users listing. */
-router.get('/', async(req, res, next) => {
-  let users = await new User().fetchAll();
-  res.status(200).json(users.toJSON());
-});
 
 router.get('/profile', helpers.requireAuthentication, async (req, res, next) => {
   let user_id = req.user.id;
