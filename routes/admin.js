@@ -6,6 +6,7 @@ const User = require('../models/user');
 const Driver = require('../models/driver');
 const Organization = require('../models/organization');
 const ServiceType = require('../models/service_type');
+const Vehicle = require('../models/vehicle');
 
 // User routes
 
@@ -184,6 +185,17 @@ router.post('/services', async (req, res, next) => {
     res.status(422).json({errors: ['No se pudo crear el Servicio']});
 });
 
+router.get('/service/:id', async (req, res, next) => {
+  const service_id = req.params.id;
+  let service = await new ServiceType({id: service_id}).fetch();
+  if (service) {
+    res.status(200).json(service.toJSON());
+  }
+  else {
+    res.status(422).json({errors: ['Este Servicio no existe']});
+  }
+});
+
 router.put('/service/:id', async (req, res, next) => {
   const service_id = req.params.id;
   let service = await new ServiceType({id: service_id}).fetch();
@@ -211,6 +223,72 @@ router.delete('/service/:id', async (req, res, next) => {
         break;
       }
     }
+  }
+});
+
+// Vehicles routes
+
+router.get('/vehicles', async (req, res, next) => {
+  const vehicles = await new Vehicle().fetchAll();
+  res.status(200).json(vehicles.toJSON());
+});
+
+router.get('/vehicle/:id', async (req, res, next) => {
+  const vehicle_id = req.params.id;
+  const vehicle = await new Vehicle({id: vehicle_id}).fetch();
+  if (vehicle) {
+    res.status(200).json(vehicle.toJSON());
+  }
+  else {
+    res.status(404).json({errrors: ['Este Vehiculo no existe']});
+  }
+});
+
+router.post('/vehicles', async (req, res, next) => {
+  try {
+    const vehicle = await new Vehicle(req.body).save();
+    res.status(201).json(vehicle.toJSON());
+  }
+  catch(error) {
+    res.status(400).json({errors: ['No se puede guardar el Vehiculo'], error_code: error.code});
+  }
+});
+
+router.put('/vehicle/:id', async (req, res, next) => {
+  const vehicle_id = req.params.id;
+  let vehicle = await new Vehicle({id: vehicle_id}).fetch();
+  if (vehicle) {
+    try {
+      vehicle = await vehicle.save(req.body, {patch: true})
+      res.status(201).json(vehicle.toJSON());
+    }
+    catch(error) {
+      res.status(400).json({errors: ['No se puede actualizar el Vehiculo'], error_code: error.code});
+    }
+  }
+  else {
+    res.status(404).json({errors: ['Este Vehiculo no existe']});
+  }
+});
+
+router.delete('/vehicle/:id', async (req, res, next) => {
+  const vehicle_id = req.params.id;
+  let vehicle = await new Vehicle({id: vehicle_id}).fetch();
+  if (vehicle) {
+    try {
+      vehicle = await vehicle.destroy()
+      res.status(201).json({flash: ['Vehiculo eliminado con exito']});
+    }
+    catch(error) {
+      switch (error.code){
+        case '23503':
+        res.status(400).json({errors: ['Este Vehiculo esta referenciado en otra tabla']});
+        break;
+      }
+    }
+  }
+  else {
+    res.status(404).json({errors: ['Este Vehiculo no existe']});
   }
 });
 
