@@ -7,6 +7,7 @@ const Driver = require('../models/driver');
 const Organization = require('../models/organization');
 const ServiceType = require('../models/service_type');
 const Vehicle = require('../models/vehicle');
+const Trip = require('../models/trip');
 
 // User routes
 
@@ -289,6 +290,72 @@ router.delete('/vehicle/:id', async (req, res, next) => {
   }
   else {
     res.status(404).json({errors: ['Este Vehiculo no existe']});
+  }
+});
+
+// Trips routes
+
+router.get('/trips', async (req, res, next) => {
+  const trips = await new Trip().fetchAll();
+  res.status(200).json(trips.toJSON());
+});
+
+router.get('/trip/:id', async (req, res, next) => {
+  const trip_id = req.params.id;
+  const trip = await new Trip({id: trip_id}).fetch();
+  if (trip) {
+    res.status(200).json(trip.toJSON());
+  }
+  else {
+    res.status(404).json({errrors: ['Este Viaje no existe']});
+  }
+});
+
+router.post('/trips', async (req, res, next) => {
+  try {
+    const trip = await new Trip(req.body).save();
+    res.status(201).json(trip.toJSON());
+  }
+  catch(error) {
+    res.status(400).json({errors: ['No se puede guardar el Viaje'], error_code: error.code});
+  }
+});
+
+router.put('/trip/:id', async (req, res, next) => {
+  const trip_id = req.params.id;
+  let trip = await new Trip({id: trip_id}).fetch();
+  if (trip) {
+    try {
+      trip = await trip.save(req.body, {patch: true})
+      res.status(201).json(trip.toJSON());
+    }
+    catch(error) {
+      res.status(400).json({errors: ['No se puede actualizar el Viaje'], error_code: error.code});
+    }
+  }
+  else {
+    res.status(404).json({errors: ['Este Viaje no existe']});
+  }
+});
+
+router.delete('/trip/:id', async (req, res, next) => {
+  const trip_id = req.params.id;
+  let trip = await new Trip({id: trip_id}).fetch();
+  if (trip) {
+    try {
+      trip = await trip.destroy()
+      res.status(201).json({flash: ['Viaje eliminado con exito']});
+    }
+    catch(error) {
+      switch (error.code){
+        case '23503':
+        res.status(400).json({errors: ['Este Viaje esta referenciado en otra tabla']});
+        break;
+      }
+    }
+  }
+  else {
+    res.status(404).json({errors: ['Este Viaje no existe']});
   }
 });
 
