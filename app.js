@@ -47,7 +47,7 @@ app.use('/api/vehicles', vehiclesRouter);
 app.use('/api/service_types', serviceTypesRouter);
 app.use('/api/organizations', organizationsRouter);
 app.use('/api/admin', adminRouter);
-app.use('/password_reset', passwordResetRouter);
+app.use('/api/password_reset', passwordResetRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

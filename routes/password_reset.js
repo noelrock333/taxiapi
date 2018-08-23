@@ -34,9 +34,10 @@ router.post('/', async (req, res, next) => {
     };
 
     sgMail.send(msg, () => {
-      res.status(200).json({});
+      return res.status(200).json({});
     });
   }
+  res.status(200).json({});
 });
 
 router.post('/change_password', helpers.requireResetPasswordToken, async (req, res, next) => {
