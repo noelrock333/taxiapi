@@ -30,7 +30,7 @@ router.post('/', async (req, res, next) => {
           Para actualizar tu contraseña da click a este link
         </strong>
         Este link expirara en 10 minutos:
-        <a href="${url}/password_reset?token=${token}">Click Aqui</a>`
+        <a href="${url}/api/password_reset?token=${token}">Click Aqui</a>`
     };
 
     sgMail.send(msg, () => {
