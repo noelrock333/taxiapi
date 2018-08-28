@@ -13,8 +13,10 @@ const firebase = require('../firebase');
 // User routes
 
 router.get('/users', async (req, res, next) => {
-  const users = await new User().fetchAll();
-  res.status(200).json(users.toJSON());
+  const {page} = req.query;
+  const users = await new User().orderBy('id', 'ASC').fetchPage({pageSize: 15, page});
+  const {pageCount} = users.pagination;
+  res.status(200).json({users: users.toJSON(), pageCount});
 });
 
 router.get('/user/:id', async (req, res, next) => {
@@ -64,8 +66,10 @@ router.delete('/user/:id', async (req, res, next) => {
 // Driver routes
 
 router.get('/drivers', async (req, res, next) => {
-  const drivers = await new Driver().fetchAll();
-  res.status(200).json(drivers.toJSON());
+  const {page} = req.query;
+  const drivers = await new Driver().orderBy('id', 'ASC').fetchPage({pageSize: 15, page});
+  const {pageCount} = drivers.pagination;
+  res.status(200).json({drivers: drivers.toJSON(), pageCount});
 });
 
 router.get('/driver/:id', async (req, res, next) => {
@@ -115,8 +119,10 @@ router.delete('/driver/:id', async (req, res, next) => {
 // Organization routes
 
 router.get('/organizations', async (req, res, next) => {
-  const organizations = await new Organization().fetchAll();
-  res.status(200).json(organizations.toJSON());
+  const {page} = req.query;
+  const organizations = await new Organization().orderBy('id', 'ASC').fetchPage({pageSize: 15, page});
+  const {pageCount} = organizations.pagination;
+  res.status(200).json({organizations: organizations.toJSON(), pageCount});
 })
 
 router.post('/organizations', async (req, res, next) => {
@@ -174,8 +180,10 @@ router.delete('/organization/:id', async (req, res, next) => {
 //Service_types_routes
 
 router.get('/services', async (req, res, next) => {
-  const services = await new ServiceType().fetchAll();
-  res.status(200).json(services.toJSON());
+  const {page} = req.query;
+  const services = await new ServiceType().orderBy('id', 'ASC').fetchPage({pageSize: 15, page});
+  const {pageCount} = services.pagination;
+  res.status(200).json({services: services.toJSON(), pageCount});
 });
 
 router.post('/services', async (req, res, next) => {
@@ -231,8 +239,10 @@ router.delete('/service/:id', async (req, res, next) => {
 // Vehicles routes
 
 router.get('/vehicles', async (req, res, next) => {
-  const vehicles = await new Vehicle().fetchAll();
-  res.status(200).json(vehicles.toJSON());
+  const {page} = req.query;
+  const vehicles = await new Vehicle().orderBy('id', 'ASC').fetchPage({pageSize: 15, page});
+  const {pageCount} = vehicles.pagination;
+  res.status(200).json({vehicles: vehicles.toJSON(), pageCount});
 });
 
 router.get('/vehicle/:id', async (req, res, next) => {
@@ -297,8 +307,10 @@ router.delete('/vehicle/:id', async (req, res, next) => {
 // Trips routes
 
 router.get('/trips', async (req, res, next) => {
-  const trips = await new Trip().fetchAll();
-  res.status(200).json(trips.toJSON());
+  const {page} = req.query;
+  const trips = await new Trip().orderBy('id', 'ASC').fetchPage({pageSize: 15, page});
+  const { pageCount } = trips.pagination;
+  res.status(200).json({ trips: trips.toJSON(), pageCount});
 });
 
 router.get('/trip/:id', async (req, res, next) => {
