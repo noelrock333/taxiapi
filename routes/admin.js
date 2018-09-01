@@ -67,7 +67,7 @@ router.delete('/user/:id', async (req, res, next) => {
 
 router.get('/drivers', async (req, res, next) => {
   const {page} = req.query;
-  const drivers = await new Driver().orderBy('id', 'ASC').fetchPage({pageSize: 15, page});
+  const drivers = await new Driver().orderBy('id', 'ASC').fetchPage({withRelated: ['vehicle.organization', 'user'], pageSize: 15, page});
   const {pageCount} = drivers.pagination;
   res.status(200).json({drivers: drivers.toJSON(), pageCount});
 });
