@@ -1,5 +1,11 @@
 const validate = require('../../lib/validate');
 
+const matchLabel = {
+  address_origin: "Dirección de origen",
+  lat_origin: "Latitude origen",
+  lng_origin: "Longitud origen"
+}
+
 function validateTrip(attributes) {
   let constraints = {
     address_origin: {
@@ -13,7 +19,12 @@ function validateTrip(attributes) {
     }
   };
 
-  return validate.async(attributes, constraints);
+  return validate.async(attributes, constraints, {
+    prettify: function prettify(string) {
+      string = matchLabel[string];
+      return validate.prettify(string);
+    }
+  });
 }
 
 module.exports = {

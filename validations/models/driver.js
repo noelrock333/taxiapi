@@ -1,5 +1,15 @@
 const validate = require('../../lib/validate');
 
+const matchLabel = {
+  full_name: "Nombre",
+  email: "Correo",
+  password: "Contraseña",
+  license_number: "Numero de Licencia",
+  status: "Estado",
+  public_service_permission_image: "Gafete",
+  phone_number: "Numero telefonico"
+}
+
 function validateDriver(attributes) {
   let constraints = {
     full_name: {
@@ -36,7 +46,12 @@ function validateDriver(attributes) {
     }
   };
 
-  return validate.async(attributes, constraints);
+  return validate.async(attributes, constraints, {
+    prettify: function prettify(string) {
+      string = matchLabel[string];
+      return validate.prettify(string);
+    }
+  });
 }
 
 module.exports = {
@@ -44,6 +59,7 @@ module.exports = {
     return validateDriver(req.body).then(() => {
       return next()
     }, err => {
+      console.log(err)
       const errors = {
         errors: Object.keys(err).reduce((previousValue, key) => {
           return [...previousValue, ...err[key]]

@@ -1,5 +1,10 @@
 const validate = require('../../lib/validate');
 
+const matchLabel = {
+  organization_id: "Id de la organización",
+  number: "Numero",
+}
+
 function validateVehicle(attributes) {
   let constraints = {
     organization_id: {
@@ -10,7 +15,12 @@ function validateVehicle(attributes) {
     }
   };
 
-  return validate.async(attributes, constraints);
+  return validate.async(attributes, constraints, {
+    prettify: function prettify(string) {
+      string = matchLabel[string];
+      return validate.prettify(string);
+    }
+  });
 }
 
 module.exports = {
