@@ -147,4 +147,41 @@ router.put('/cancel_trip', helpers.requireAuthentication, async (req, res, next)
     res.status(404).json({errors: ['No se pudo encontrar el Usuario']});
 });
 
+router.put('/active_trip/add_references', helpers.requireAuthentication, async (req, res, next) => {
+  let { references } = req.body;
+
+  let user_id = req.user.id;
+  let user = await new User({id: user_id}).fetch();
+  let trip = await user.activeTrip();
+
+  if (trip) {
+    trip = await trip.save({references}, {patch: true});
+    if (trip.toJSON().references === references) {
+      trip = await new Trip({id: trip.toJSON().id}).fetch({withRelated: ['user', 'driver.user','vehicle']});
+
+      if (trip.toJSON().status == "holding"){
+        firebase
+          .database()
+          .ref('server/holding_trips/')
+          .child(trip.toJSON().id)
+          .set({...trip.toJSON(), timestamp: new Date(trip.toJSON().created_at).getTime()});
+      }
+      else if (trip.toJSON().status == "active"){
+        firebase
+          .database()
+          .ref('server/taken_trips/')
+          .child(trip.toJSON().id)
+          .set({...trip.toJSON(), timestamp: new Date(trip.toJSON().created_at).getTime()});
+      }
+
+      res.status(200).json(trip.toJSON());
+    } else {
+      res.status(422).json({errors: ['No se pudo guardar las referencia']});
+    }
+  }
+  else {
+    res.status(422).json({errors: ['El usuario no tiene viajes activos']});
+  }
+});
+
 module.exports = router;
