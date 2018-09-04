@@ -3,7 +3,6 @@ const uuid = require('uuid/v4');
 
 const storage =  multer.diskStorage({
   destination: function(req, file, cb){
-    console.log(file);
     const path = () => {
       switch(file.fieldname){
         case 'profile_image':
