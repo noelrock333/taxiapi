@@ -12,14 +12,14 @@ const firebase = require('../firebase');
 
 // User routes
 
-router.get('/users', helpers.requireAuthentication, async (req, res, next) => {
+router.get('/users', helpers.requireAdminAuthentication, async (req, res, next) => {
   const {page} = req.query;
   const users = await new User().orderBy('id', 'ASC').fetchPage({pageSize: 15, page});
   const {pageCount} = users.pagination;
   res.status(200).json({users: users.toJSON(), pageCount});
 });
 
-router.get('/user/:id', helpers.requireAuthentication, async (req, res, next) => {
+router.get('/user/:id', helpers.requireAdminAuthentication, async (req, res, next) => {
   const user_id = req.params.id;
   const user = await new User({id: user_id}).fetch();
   if (user) {
@@ -30,7 +30,7 @@ router.get('/user/:id', helpers.requireAuthentication, async (req, res, next) =>
   }
 });
 
-router.put('/user/:id', helpers.requireAuthentication, async (req, res, next) => {
+router.put('/user/:id', helpers.requireAdminAuthentication, async (req, res, next) => {
   const user_id = req.params.id;
   let user = await new User({id: user_id}).fetch();
   if(user) {
@@ -42,7 +42,7 @@ router.put('/user/:id', helpers.requireAuthentication, async (req, res, next) =>
   }
 });
 
-router.delete('/user/:id', helpers.requireAuthentication, async (req, res, next) => {
+router.delete('/user/:id', helpers.requireAdminAuthentication, async (req, res, next) => {
   const user_id = req.params.id;
   let user = await new User({id: user_id}).fetch();
   if(user) {
@@ -65,14 +65,14 @@ router.delete('/user/:id', helpers.requireAuthentication, async (req, res, next)
 
 // Driver routes
 
-router.get('/drivers', helpers.requireAuthentication, async (req, res, next) => {
+router.get('/drivers', helpers.requireAdminAuthentication, async (req, res, next) => {
   const {page} = req.query;
   const drivers = await new Driver().orderBy('id', 'ASC').fetchPage({withRelated: ['vehicle.organization', 'user'], pageSize: 15, page});
   const {pageCount} = drivers.pagination;
   res.status(200).json({drivers: drivers.toJSON(), pageCount});
 });
 
-router.get('/driver/:id', helpers.requireAuthentication, async (req, res, next) => {
+router.get('/driver/:id', helpers.requireAdminAuthentication, async (req, res, next) => {
   const driver_id = req.params.id;
   const driver = await new Driver({id: driver_id}).fetch();
   if (driver) {
@@ -83,7 +83,7 @@ router.get('/driver/:id', helpers.requireAuthentication, async (req, res, next) 
   }
 });
 
-router.put('/driver/:id', helpers.requireAuthentication, async (req, res, next) => {
+router.put('/driver/:id', helpers.requireAdminAuthentication, async (req, res, next) => {
   const driver_id = req.params.id;
   let driver = await new Driver({id: driver_id}).fetch();
   if(driver) {
@@ -95,7 +95,7 @@ router.put('/driver/:id', helpers.requireAuthentication, async (req, res, next) 
   }
 });
 
-router.delete('/driver/:id', helpers.requireAuthentication, async (req, res, next) => {
+router.delete('/driver/:id', helpers.requireAdminAuthentication, async (req, res, next) => {
   const driver_id = req.params.id;
   let driver = await new Driver({id: driver_id}).fetch();
   if(driver) {
