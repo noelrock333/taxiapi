@@ -6,6 +6,7 @@ const User = require('../models/user');
 const Trip = require('../models/trip');
 const helpers = require('../lib/helpers');
 const firebase = require('../firebase');
+const userValidation = require('../validations/models/user');
 
 router.get('/profile', helpers.requireAuthentication, async (req, res, next) => {
   let user_id = req.user.id;
@@ -29,10 +30,10 @@ router.put('/profile', helpers.requireAuthentication, async (req, res, next) => 
     res.status(404).json({errors: ['No se pudo encontrar al Conductor']});
 });
 
-router.post('/signup', async (req, res, next) => {
-  let { email, password, full_name } = req.body;
+router.post('/signup', userValidation.validate, async (req, res, next) => {
+  let { email, password, full_name, phone_number } = req.body;
   var password_hash = SHA256(`${password}`).toString();
-  let user = await new User({ email, password_hash, full_name}).save();
+  let user = await new User({ email, password_hash, full_name, phone_number }).save();
   if (user){
     user = user.toJSON();
     const token = authToken.encode({

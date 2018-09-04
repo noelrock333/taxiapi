@@ -4,13 +4,10 @@ const matchLabel = {
   full_name: "Nombre",
   email: "Correo",
   password: "Contraseña",
-  license_number: "Numero de Licencia",
-  status: "Estado",
-  public_service_permission_image: "Gafete",
   phone_number: "Numero telefonico"
 }
 
-function validateDriver(attributes) {
+function validateUser(attributes) {
   let constraints = {
     full_name: {
       presence: {allowEmpty: false}
@@ -24,21 +21,6 @@ function validateDriver(attributes) {
     },
     password: {
       length: {minimum: 6}
-    },
-    license_number: {
-      presence: {allowEmpty: false},
-      uniqueness: {
-        table: 'drivers'
-      }
-    },
-    status: {
-      inclusion: [
-        'free',
-        'busy'
-      ]
-    },
-    public_service_permission_image: {
-      presence: {allowEmpty: false}
     },
     phone_number: {
       presence: {allowEmpty: false},
@@ -56,7 +38,7 @@ function validateDriver(attributes) {
 
 module.exports = {
   validate: (req, res, next) => {
-    return validateDriver(req.body).then(() => {
+    return validateUser(req.body).then(() => {
       return next()
     }, err => {
       const errors = {
