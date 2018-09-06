@@ -10,4 +10,9 @@ router.get('/taxista', function(req, res, next) {
   res.render('taxista');
 });
 
+router.get('/terminos_y_condiciones', function(req, res, next) {
+  res.render('terminos_y_condiciones');
+});
+
+
 module.exports = router;
