@@ -10,7 +10,8 @@ const matchLabel = {
 function validateUser(attributes) {
   let constraints = {
     full_name: {
-      presence: {allowEmpty: false}
+      presence: {allowEmpty: false},
+      length: {maximum: 100}
     },
     email: {
       presence: {allowEmpty: false},
