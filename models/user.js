@@ -3,7 +3,7 @@ const bookshelf = require('../bookshelf');
 const User = bookshelf.Model.extend({
   hasTimestamps: true,
   tableName: 'users',
-  hidden: ['password_hash', 'device_id'],
+  hidden: ['password_hash'],
   trips: function(){
     const Trip = require('./trip');
     return this.hasMany(Trip);
