@@ -123,7 +123,7 @@ router.put('/accept_trip', helpers.requireAuthentication, async (req, res, next)
         }
       };
 
-      console.log('device id', trip.toJSON());
+      console.log('device id', trip.toJSON().user);
 
       firebase.messaging().sendToDevice(trip.toJSON().user.device_id, payload)
         .then((resp) => {
