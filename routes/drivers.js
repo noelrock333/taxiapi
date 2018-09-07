@@ -106,9 +106,9 @@ router.put('/accept_trip', helpers.requireAuthentication, async (req, res, next)
         .set(trip.toJSON());
       
       var message = {
-        data: {
-          score: '850',
-          time: '2:45'
+        notification: {
+          title: '1.43% on the day',
+          body: 'gained 11.80 points to close at 835.67, up 1.43% on the day.'
         },
         token: trip.toJSON().user.device_id
       };
