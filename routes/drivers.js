@@ -109,7 +109,16 @@ router.put('/accept_trip', helpers.requireAuthentication, async (req, res, next)
         notification: {
           title: '1.43% on the day',
           body: 'gained 11.80 points to close at 835.67, up 1.43% on the day.',
-          sound: 'default'
+        },
+        android: {
+          notification: {
+            sound: 'default'
+          }
+        },
+        apns: {
+          payload: {
+            sound: 'default'
+          }
         },
         token: trip.toJSON().user.device_id
       };
