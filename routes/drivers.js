@@ -105,13 +105,10 @@ router.put('/accept_trip', helpers.requireAuthentication, async (req, res, next)
         .child(trip.toJSON().id)
         .set(trip.toJSON());
       
-      const message = {
-        "custom_notification": {
-          "title" : "Test title",
-          "body" : "Test body",
-          "color": "#00ACD4",
-          "priority": "high",
-          "show_in_foreground": true
+      var message = {
+        data: {
+          score: '850',
+          time: '2:45'
         },
         token: trip.toJSON().user.device_id
       };
