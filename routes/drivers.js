@@ -94,16 +94,34 @@ router.put('/accept_trip', helpers.requireAuthentication, async (req, res, next)
       trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle.organization']});
 
       firebase
-          .database()
-          .ref('server/holding_trips/')
-          .child(trip.toJSON().id)
-          .remove();
+        .database()
+        .ref('server/holding_trips/')
+        .child(trip.toJSON().id)
+        .remove();
 
       firebase
         .database()
         .ref('server/taken_trips/')
         .child(trip.toJSON().id)
         .set(trip.toJSON());
+      
+      const message = {
+        "custom_notification": {
+          "title" : "Test title",
+          "body" : "Test body",
+          "color": "#00ACD4",
+          "priority": "high",
+          "show_in_foreground": true
+        },
+        token: trip.toJSON().user.device_id
+      };
+
+      firebase.messaging().send(message)
+        .then((resp) => {
+          console.log('Message sent successfully:', resp);
+        }).catch((err) => {
+          console.log('Failed to send the message:', err);
+        });
 
       res.status(200).json(trip.toJSON());
     }
