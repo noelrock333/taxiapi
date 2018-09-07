@@ -105,27 +105,20 @@ router.put('/accept_trip', helpers.requireAuthentication, async (req, res, next)
         .child(trip.toJSON().id)
         .set(trip.toJSON());
       
-      // const message = {
-      //   "custom_notification": {
-      //     "title" : "Test title",
-      //     "body" : "Test body",
-      //     "color": "#00ACD4",
-      //     "priority": "high",
-      //     "show_in_foreground": true
-      //   },
-      //   token: trip.toJSON().user.device_id
-      // };
-
-      var payload = {
-        data: {
-          score: '850',
-          time: '2:45'
-        }
+      const message = {
+        "custom_notification": {
+          "title" : "Test title",
+          "body" : "Test body",
+          "color": "#00ACD4",
+          "priority": "high",
+          "show_in_foreground": true
+        },
+        token: trip.toJSON().user.device_id
       };
 
       console.log('device id', trip.toJSON().user);
 
-      firebase.messaging().sendToDevice(trip.toJSON().user.device_id, payload)
+      firebase.messaging().send(message)
         .then((resp) => {
           console.log('Message sent successfully:', resp);
         }).catch((err) => {
