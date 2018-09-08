@@ -117,13 +117,13 @@ router.put('/accept_trip', helpers.requireAuthentication, async (req, res, next)
         },
         apns: {
           payload: {
-            sound: 'default'
+            aps: {
+              sound: 'default'
+            }
           }
         },
         token: trip.toJSON().user.device_id
       };
-
-      console.log('device id', trip.toJSON().user);
 
       firebase.messaging().send(message)
         .then((resp) => {
