@@ -107,8 +107,8 @@ router.put('/accept_trip', helpers.requireAuthentication, async (req, res, next)
       
       var message = {
         notification: {
-          title: '1.43% on the day',
-          body: 'gained 11.80 points to close at 835.67, up 1.43% on the day.',
+          title: 'Cytio',
+          body: 'Taxi en camino',
         },
         android: {
           notification: {
