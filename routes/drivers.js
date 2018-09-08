@@ -107,8 +107,8 @@ router.put('/accept_trip', helpers.requireAuthentication, async (req, res, next)
       
       var message = {
         notification: {
-          title: 'Cytio',
-          body: 'Taxi en camino',
+          title: 'Servicio aceptado',
+          body: 'Tu taxi está en camino',
         },
         android: {
           notification: {
