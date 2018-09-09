@@ -308,6 +308,7 @@ router.delete('/vehicle/:id', helpers.requireAdminAuthentication, async (req, re
 
 router.get('/trips', helpers.requireAdminAuthentication, async (req, res, next) => {
   const {page, status} = req.query;
+  console.log('==STATUS', status);
   const trips = await new Trip({ status: status }).orderBy('id', 'ASC').fetchPage({pageSize: 15, page, withRelated: ['user', 'driver.user'] });
   const { pageCount } = trips.pagination;
   res.status(200).json({ trips: trips.toJSON(), pageCount});
