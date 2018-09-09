@@ -221,7 +221,7 @@ router.put('/service/:id', helpers.requireAdminAuthentication, async (req, res, 
 router.delete('/service/:id', helpers.requireAdminAuthentication, async (req, res, next) => {
   const service_id = req.params.id;
   let service = await new ServiceType({id: service_id}).fetch();
-  if (service){
+  if (service) {
     try {
       service = await service.destroy();
       res.status(200).json({flash: ['Servicio eliminado con exito']});
@@ -307,8 +307,8 @@ router.delete('/vehicle/:id', helpers.requireAdminAuthentication, async (req, re
 // Trips routes
 
 router.get('/trips', helpers.requireAdminAuthentication, async (req, res, next) => {
-  const {page} = req.query;
-  const trips = await new Trip().orderBy('id', 'ASC').fetchPage({pageSize: 15, page});
+  const {page, status} = req.query;
+  const trips = await new Trip({ status: status }).orderBy('id', 'ASC').fetchPage({pageSize: 15, page, withRelated: ['user', 'driver.user'] });
   const { pageCount } = trips.pagination;
   res.status(200).json({ trips: trips.toJSON(), pageCount});
 });
