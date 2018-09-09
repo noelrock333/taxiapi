@@ -141,6 +141,49 @@ router.put('/accept_trip', helpers.requireAuthentication, async (req, res, next)
     res.status(422).json({errors: [ 'No se pudo encontrar el Viaje o el Conductor no tiene Vehículo asignado']});
 });
 
+router.put('/notify_user', helpers.requireAuthentication, async (req, res, next) => {
+  let driver_id = req.driver.id;
+  let driver = await new Driver({id: driver_id}).fetch();
+  if (driver) {
+    let trip = await driver.activeTrip();
+    if (trip) {
+      trip = await trip.fetch({withRelated: ['user', 'driver.user', 'vehicle.organization']});
+
+      var message = {
+        notification: {
+          title: 'Tu Cytio ha llegado',
+          body: 'Tu taxi está en la puerta',
+        },
+        android: {
+          notification: {
+            sound: 'default'
+          }
+        },
+        apns: {
+          payload: {
+            aps: {
+              sound: 'default'
+            }
+          }
+        },
+        token: trip.toJSON().user.device_id
+      };
+
+      firebase.messaging().send(message)
+        .then((resp) => {
+          console.log('Message sent successfully:', resp);
+          res.status(200).json(trip.toJSON());
+        }).catch((err) => {
+          console.log('Failed to send the message:', err);
+          res.status(422).json({errors: ['No se pudo enviar la notificación al usuario'] });
+        });
+    }
+  }
+  else
+    res.status(422).json({errors: [ 'No se pudo encontrar el Servicio']});
+});
+
+
 // router.put('/start_trip', helpers.requireAuthentication,async (req, res, next) => {
 //   let driver_id = req.driver.id;
 //   let driver = await new Driver({id: driver_id}).fetch();
