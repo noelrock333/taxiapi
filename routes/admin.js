@@ -423,8 +423,8 @@ router.get('/blacklist', async (req, res, next) => {
 });
 
 router.post('/blacklist', async (req, res, next) => {
-  const driver_id = req.body.driver_id;
-  const driver_banned = await new BlackList({driver_id}).save();
+  const {driver_id, reason = ""} = req.body
+  const driver_banned = await new BlackList({driver_id, reason}).save();
   if (driver_banned){
     res.status(200).json(driver_banned.toJSON());
   }

@@ -5,6 +5,7 @@ exports.up = function(knex, Promise) {
       t.increments('id').primary();
       t.integer('driver_id').unsigned().notNullable();
       t.unique('driver_id');
+      t.string('reason');
 
       t.foreign('driver_id').references('id').inTable('drivers');
       t.timestamps();
