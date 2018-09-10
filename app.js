@@ -98,7 +98,8 @@ function clearTrips() {
         var oldTrips = trips.toJSON();
         var oldTripsIds = oldTrips.map(item => item.id)
         
-        console.log(oldTrips)
+        console.log('Removing', oldTripsIds);
+
         oldTrips.forEach(trip => {
           firebase
             .database()
@@ -106,7 +107,7 @@ function clearTrips() {
             .child(trip.id)
             .remove();
           sendPushNotification({ 
-            token: device_id,
+            token: trip.device_id,
             title: 'Lo sentimos',
             body: 'Tu servicio ha excedido el tiempo de espera'
           });
