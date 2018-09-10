@@ -81,8 +81,8 @@ io.on('connection', socket => {
   });
 });
 
-cron.schedule("0 */10 * * * *", function() {
-  console.log("Clear old trips");
+cron.schedule("0 */5 * * * *", function() {
+  console.log('Clear old trips');
   clearTrips();
 });
 
@@ -98,7 +98,7 @@ function clearTrips() {
         var oldTrips = trips.toJSON();
         var oldTripsIds = oldTrips.map(item => item.id)
         
-        console.log('Removing', oldTripsIds);
+        console.log('Removing old trips', oldTripsIds);
 
         oldTrips.forEach(trip => {
           firebase
@@ -117,7 +117,7 @@ function clearTrips() {
           new Trip()
             .query(qb => {
               qb.whereIn('id', oldTripsIds) 
-            }).destroy();
+            }).save({ status: 'canceled' }, { patch: true});
         }
       }
     });
