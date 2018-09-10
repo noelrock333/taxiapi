@@ -34,7 +34,7 @@ const Driver = bookshelf.Model.extend({
     const availableTrips = trips.map((trip) => {
       let destiny_coords = {lat: trip.lat_origin, lon: trip.lng_origin};
       let distance = geodist(origin_coords, destiny_coords, geodistOptions)
-      if (distance < 4) {
+      if (distance < Number(process.env.DEFAULT_RANGE)) {
         return (
           {
             id: trip.id,
