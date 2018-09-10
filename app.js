@@ -107,7 +107,7 @@ function clearTrips() {
             .child(trip.id)
             .remove();
           sendPushNotification({ 
-            token: trip.device_id,
+            token: trip.user.device_id,
             title: 'Lo sentimos',
             body: 'Tu servicio ha excedido el tiempo de espera'
           });
@@ -124,6 +124,7 @@ function clearTrips() {
 }
 
 function sendPushNotification(options) {
+  console.log('sendPushNotification');
   if (options.token && options.title && options.body) {
     var message = {
       notification: {
