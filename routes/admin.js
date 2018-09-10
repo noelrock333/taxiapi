@@ -117,6 +117,24 @@ router.delete('/driver/:id', helpers.requireAdminAuthentication, async (req, res
   }
 });
 
+router.put('/driver/:id/activate', async (req, res, next) => {
+  const driver_id = req.params.id;
+  let driver = await new Driver({id: driver_id}).fetch();
+  if (driver) {
+    const active = driver.toJSON().active;
+    driver = await driver.save({ active: !active }, {patch: true});
+    if (driver.toJSON().active == !active){
+      res.status(200).json(driver.toJSON());
+    }
+    else {
+      res.status(422).json({errors: ['El status del conductor no pudo ser cambiado']});
+    }
+  }
+  else {
+    res.status(404).json({errors: ['Este Conductor no existe']});
+  }
+});
+
 // Organization routes
 
 router.get('/organizations', helpers.requireAdminAuthentication, async (req, res, next) => {
