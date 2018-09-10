@@ -8,6 +8,10 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var cors = require('cors');
 var bodyParser = require('body-parser');
+var cron = require("node-cron");
+const firebase = require('./firebase');
+
+const Trip = require('./models/trip');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -76,6 +80,78 @@ io.on('connection', socket => {
     socket.join(`user-${user_id}`);
   });
 });
+
+cron.schedule("0 */10 * * * *", function() {
+  console.log("Clear old trips");
+  clearTrips();
+});
+
+function clearTrips() {
+  new Trip()
+    .query(function(qb) {
+      qb.whereRaw("age(now(), created_at) > '10 minutes'");
+    })
+    .where({ status: 'holding' })
+    .fetchAll({ withRelated: 'user' })
+    .then(trips => {
+      if (trips) {
+        var oldTrips = trips.toJSON();
+        var oldTripsIds = oldTrips.map(item => item.id)
+        
+        console.log(oldTrips)
+        oldTrips.forEach(trip => {
+          firebase
+            .database()
+            .ref('server/holding_trips/')
+            .child(trip.id)
+            .remove();
+          sendPushNotification({ 
+            token: device_id,
+            title: 'Lo sentimos',
+            body: 'Tu servicio ha excedido el tiempo de espera'
+          });
+        })
+
+        if (oldTripsIds.length > 0) {
+          new Trip()
+            .query(qb => {
+              qb.whereIn('id', oldTripsIds) 
+            }).destroy();
+        }
+      }
+    });
+}
+
+function sendPushNotification(options) {
+  if (options.token && options.title && options.body) {
+    var message = {
+      notification: {
+        title: options.title,
+        body: options.body,
+      },
+      android: {
+        notification: {
+          sound: 'default'
+        }
+      },
+      apns: {
+        payload: {
+          aps: {
+            sound: 'default'
+          }
+        }
+      },
+      token: options.token
+    };
+  
+    firebase.messaging().send(message)
+      .then((resp) => {
+        console.log('Message sent successfully:', resp);
+      }).catch((err) => {
+        console.log('Failed to send the message:', err);
+      });
+  }
+}
 
 module.exports = {
   app: app,
