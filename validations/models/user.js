@@ -8,6 +8,7 @@ const matchLabel = {
 }
 
 function validateUser(attributes) {
+  console.log(attributes)
   let constraints = {
     full_name: {
       presence: {allowEmpty: false},
