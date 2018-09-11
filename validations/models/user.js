@@ -43,6 +43,7 @@ module.exports = {
     return validateUser(req.body).then(() => {
       return next()
     }, err => {
+      console.log(err);
       const errors = {
         errors: Object.keys(err).reduce((previousValue, key) => {
           return [...previousValue, ...err[key]]
