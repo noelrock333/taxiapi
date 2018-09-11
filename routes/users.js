@@ -33,7 +33,6 @@ router.put('/profile', helpers.requireAuthentication, async (req, res, next) => 
 router.post('/signup', userValidation.validate, async (req, res, next) => {
   let { email, password, full_name, phone_number } = req.body;
   var password_hash = SHA256(`${password}`).toString();
-  console.log({ email, full_name, phone_number })
   let user = await new User({ email, password_hash, full_name, phone_number }).save();
   if (user){
     user = user.toJSON();
