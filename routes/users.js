@@ -139,10 +139,10 @@ router.put('/cancel_trip', helpers.requireAuthentication, async (req, res, next)
         res.status(200).json(trip.toJSON());
       }
       else
-        res.status(422).json({errors: ['No se pudo actualizar el status del Viaje']});
+        res.status(422).json({errors: ['No se pudo actualizar el estatus del Viaje']});
     }
     else
-      res.status(404).json({errors: ['El usuario no tiene ningun trip activo']});
+      res.status(200).json({ message: 'El usuario no tiene ningun servicio activo' });
   }
   else
     res.status(404).json({errors: ['No se pudo encontrar el Usuario']});
