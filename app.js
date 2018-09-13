@@ -90,7 +90,7 @@ cron.schedule("0 */5 * * * *", function() {
 function clearTrips() {
   new Trip()
     .query(function(qb) {
-      qb.whereRaw("age(now(), created_at) > '15 minutes'");
+      qb.whereRaw("age(now(), created_at) > '10 minutes'");
     })
     .where({ status: 'holding' })
     .fetchAll({ withRelated: 'user' })
