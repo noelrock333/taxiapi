@@ -11,7 +11,8 @@ router.post('/', helpers.requireAuthentication, validateTrip.validate, async (re
   let {
     address_origin,
     lat_origin,
-    lng_origin
+    lng_origin,
+    references
   } = req.body;
 
   let user_id = req.user.id;
@@ -25,7 +26,8 @@ router.post('/', helpers.requireAuthentication, validateTrip.validate, async (re
     address_origin,
     lat_origin,
     lng_origin,
-    user_id
+    user_id,
+    references: references || ''
   }).save();
 
   if (trip){
