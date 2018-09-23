@@ -67,7 +67,7 @@ router.delete('/user/:id', helpers.requireAdminAuthentication, async (req, res, 
 
 router.get('/drivers', helpers.requireAdminAuthentication, async (req, res, next) => {
   const {page} = req.query;
-  const drivers = await new Driver().orderBy('id', 'ASC').fetchPage({withRelated: ['vehicle.organization', 'user'], pageSize: 15, page});
+  const drivers = await new Driver().orderBy('id', 'DESC').fetchPage({withRelated: ['vehicle.organization', 'user'], pageSize: 15, page});
   const {pageCount} = drivers.pagination;
   res.status(200).json({drivers: drivers.toJSON(), pageCount});
 });
@@ -310,7 +310,7 @@ router.get('/trips', helpers.requireAdminAuthentication, async (req, res, next) 
   const { page, status } = req.query;
   const trips = await new Trip()
     .where({ status: status })
-    .orderBy('id', 'ASC')
+    .orderBy('id', 'DESC')
     .fetchPage({
       pageSize: 15,
       page,
