@@ -4,6 +4,7 @@ const SHA256 = require('crypto-js/sha256');
 const authToken = require('../lib/auth-token');
 const User = require('../models/user');
 const Trip = require('../models/trip');
+const Driver = require('../models/driver');
 const helpers = require('../lib/helpers');
 const firebase = require('../firebase');
 const userValidation = require('../validations/models/user');
@@ -121,22 +122,26 @@ router.put('/cancel_trip', helpers.requireAuthentication, async (req, res, next)
     let trip = await user.activeTrip();
     if (trip) {
       trip = await trip.cancelTrip();
-      if (trip.toJSON().status == 'canceled'){
+      let tripJSON = trip.toJSON();
+      if (tripJSON.driver) {
+        await new Driver({id: tripJSON.driver.id}).save({status: 'free'}, {patch: true});
+      }
+      if (tripJSON.status == 'canceled'){
         trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle']});
 
         firebase
           .database()
           .ref('server/holding_trips/')
-          .child(trip.toJSON().id)
+          .child(tripJSON.id)
           .remove();
 
         firebase
           .database()
           .ref('server/taken_trips/')
-          .child(trip.toJSON().id)
+          .child(tripJSON.id)
           .remove();
 
-        res.status(200).json(trip.toJSON());
+        res.status(200).json(tripJSON);
       }
       else
         res.status(422).json({errors: ['No se pudo actualizar el estatus del Viaje']});
