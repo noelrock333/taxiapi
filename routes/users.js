@@ -49,24 +49,16 @@ router.post('/signup', userValidation.validate, async (req, res, next) => {
 });
 
 router.post('/login', async (req, res, next) => {
-  const { email, password, device_id = null } = req.body;
-  let user = await new User({email}).fetch();
+  let { email, password, full_name = null, device_id = null, provider = null } = req.body;
+
+  let user = await new User().findOrCreate({
+      email, password, full_name, provider
+  });
+
   if (user){
-    const password_hash = SHA256(`${password}`).toString();
-    user_password = user.toJSON({visibility: false}).password_hash;
-    if (user_password === password_hash){
-      if (device_id) user = await user.storeDeviceId(device_id);
-      user = user.toJSON();
-      const token = authToken.encode({
-        id: user.id,
-        email: user.email,
-        role: 'customer'
-      });
-      res.status(200).json({ jwt: token });
-    }
-    else {
-      res.status(422).json({errors: ['El email o la contraseña son incorrectos']});
-    }
+    jwt = await user.login(password, device_id);
+    if (jwt) { res.status(200).json({ jwt }); }
+    else {res.status(422).json({errors: ['El email o la contraseña son incorrectos']}); }
   }
   else {
     res.status(422).json({errors: ['El email o la contraseña son incorrectos']});
