@@ -15,7 +15,7 @@ const User = bookshelf.Model.extend({
     let status = ['holding', 'taken', 'active'];
     let trip = new Trip({user_id: this.id})
       .where('status', 'in', status)
-      .fetch({withRelated: ['user', 'driver.user','vehicle']});
+      .fetch({withRelated: ['user', 'driver.user','vehicle.organization']});
     return trip
   },
   missingRates: function(){
