@@ -21,7 +21,7 @@ const Driver = bookshelf.Model.extend({
     let status = ['taken', 'active'];
     let trip = new Trip({driver_id: this.id})
       .where('status', 'in', status)
-      .fetch({withRelated: ['user', 'driver.user','vehicle']});
+      .fetch({withRelated: ['user', 'driver.user','vehicle.organization']});
     return trip
   },tripsInRange: async function(lat, lon){
     const geodist = require('geodist');
