@@ -23,10 +23,10 @@ router.get('/profile', helpers.requireAuthentication, async (req, res, next) => 
 
 router.put('/profile', helpers.requireAuthentication, async (req, res, next) => {
   const driver_id = req.driver.id;
-  let driver = await new Driver({id: driver_id}).fetch({withRelated: ['vehicle.organization', 'user']});
+  let driver = await new Driver({id: driver_id}).fetch({ withRelated: ['vehicle.organization', 'user'] });
   if (driver) {
-    driver = await driver.save(req.body,{patch: true});
-    driver = await driver.fetch({withRelated: ['vehicle.organization', 'user']});
+    driver = await driver.save(req.body, {patch: true});
+    driver = await driver.fetch({ withRelated: ['vehicle.organization', 'user'] });
     res.status(200).json(driver.toJSON());
   }
   else
@@ -86,7 +86,7 @@ router.put('/accept_trip', helpers.requireAuthentication, async (req, res, next)
   let driver_id = req.driver.id;
   let trip = await new Trip({id: trip_id}).fetch();
   let driver = await new Driver({id: driver_id}).fetch();
-  if (trip && driver && (driver.toJSON().vehicle_id) && (trip.toJSON().status == 'holding')) {
+  if (trip && driver && driver.toJSON().vehicle_id && driver.toJSON().active && (trip.toJSON().status == 'holding')) {
     const vehicle_id = driver.toJSON().vehicle_id;
     trip = await trip.save({ status: 'active', driver_id, vehicle_id}, {patch: true});
     if (trip.toJSON().vehicle_id == vehicle_id){
@@ -137,10 +137,18 @@ router.put('/accept_trip', helpers.requireAuthentication, async (req, res, next)
       res.status(200).json(trip.toJSON());
     }
     else
-      res.status(422).json({errors: [ 'No se pudo actualizar el Viaje']});
+      res.status(422).json({
+        errors: ['No se pudo actualizar el Viaje']
+      });
+  } else if (!driver.toJSON().active) {
+    res.status(422).json({
+      errors: ['Usuario en proceso de activación']
+    });
+  } else {
+    res.status(422).json({
+      errors: ['No se pudo encontrar el Viaje o el Conductor no tiene Vehículo asignado']
+    });
   }
-  else
-    res.status(422).json({errors: [ 'No se pudo encontrar el Viaje o el Conductor no tiene Vehículo asignado']});
 });
 
 router.put('/notify_user', helpers.requireAuthentication, async (req, res, next) => {

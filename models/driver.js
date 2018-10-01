@@ -16,6 +16,11 @@ const Driver = bookshelf.Model.extend({
     const Trip = require('./trip');
     return this.hasMany(Trip)
   },
+  blacklist: async function() {
+    const BlackList = require('./blacklist');
+    const blacklist_driver = await new BlackList().where({driver_id: this.id}).fetch();
+    return blacklist_driver ? true : false ;
+  },
   activeTrip: function(){
     const Trip = require('./trip');
     let status = ['taken', 'active'];

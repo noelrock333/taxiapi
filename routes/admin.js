@@ -8,6 +8,7 @@ const Organization = require('../models/organization');
 const ServiceType = require('../models/service_type');
 const Vehicle = require('../models/vehicle');
 const Trip = require('../models/trip');
+const BlackList = require('../models/blacklist');
 const firebase = require('../firebase');
 
 // User routes
@@ -109,6 +110,24 @@ router.delete('/driver/:id', helpers.requireAdminAuthentication, async (req, res
         res.status(400).json({errors: ['Este Conductor esta referenciado en otra tabla']});
         break;
       }
+    }
+  }
+  else {
+    res.status(404).json({errors: ['Este Conductor no existe']});
+  }
+});
+
+router.put('/driver/:id/activate', async (req, res, next) => {
+  const driver_id = req.params.id;
+  let driver = await new Driver({id: driver_id}).fetch();
+  if (driver) {
+    const active = driver.toJSON().active;
+    driver = await driver.save({ active: !active }, {patch: true});
+    if (driver.toJSON().active == !active){
+      res.status(200).json(driver.toJSON());
+    }
+    else {
+      res.status(422).json({errors: ['El status del conductor no pudo ser cambiado']});
     }
   }
   else {
@@ -390,6 +409,39 @@ router.delete('/trip/:id', helpers.requireAdminAuthentication, async (req, res, 
   }
   else {
     res.status(404).json({errors: ['Este Viaje no existe']});
+  }
+});
+
+
+// BlackList routes
+
+router.get('/blacklist', async (req, res, next) => {
+  const {page} = req.query;
+  const blacklist = await new BlackList().fetchPage({ withRelated: ['driver'], pageSize: 15, page})
+  const {pageCount} = blacklist.pagination;
+  res.status(200).json({blacklist: blacklist.toJSON(), pageCount});
+});
+
+router.post('/blacklist', async (req, res, next) => {
+  const {driver_id, reason = ""} = req.body
+  const driver_banned = await new BlackList({driver_id, reason}).save();
+  if (driver_banned){
+    res.status(200).json(driver_banned.toJSON());
+  }
+  else {
+    res.status(422).json({errors: ['No se pudo bloquear el usuario']});
+  }
+});
+
+router.delete('/blacklist/:id', async (req, res, next) => {
+  const blacklist_id = req.params.id;
+  let blacklistItem = await new BlackList({id: blacklist_id}).fetch();
+  if (blacklistItem){
+    blacklistItem = await blacklistItem.destroy();
+    res.status(200).json({flash: ['El Conductor ha sido eliminado del blacklist']});
+  }
+  else {
+    res.status(422).json({errors: ['No se pudo encontrar al driver']});
   }
 });
 
