@@ -105,33 +105,12 @@ router.put('/accept_trip', helpers.requireAuthentication, async (req, res, next)
         .child(trip.toJSON().id)
         .set(trip.toJSON());
       
-      var message = {
-        notification: {
-          title: 'Servicio aceptado',
-          body: 'Tu taxi está en camino',
-        },
-        android: {
-          notification: {
-            sound: 'default'
-          }
-        },
-        apns: {
-          payload: {
-            aps: {
-              sound: 'default'
-            }
-          }
-        },
-        token: trip.toJSON().user.device_id
-      };
-
       if(trip.toJSON().user.device_id) {
-        firebase.messaging().send(message)
-          .then((resp) => {
-            console.log('Message sent successfully:', resp);
-          }).catch((err) => {
-            console.log('Failed to send the message:', err);
-          });
+        res.sendPushNotification({
+          token: trip.toJSON().user.device_id,
+          title: 'Servicio aceptado',
+          body: 'Tu taxi está en camino'
+        });
       }
 
       res.status(200).json(trip.toJSON());
@@ -142,7 +121,7 @@ router.put('/accept_trip', helpers.requireAuthentication, async (req, res, next)
       });
   } else if (!driver.toJSON().active) {
     res.status(422).json({
-      errors: ['Usuario en proceso de activación']
+      errors: ['No puedes tomar servicios, tu cuenta está en proceso de activación']
     });
   } else {
     res.status(422).json({

@@ -119,12 +119,20 @@ router.delete('/driver/:id', helpers.requireAdminAuthentication, async (req, res
 
 router.put('/driver/:id/activate', async (req, res, next) => {
   const driver_id = req.params.id;
-  let driver = await new Driver({id: driver_id}).fetch();
+  let driver = await new Driver({id: driver_id}).fetch({ withRelated: ['user'] });
   if (driver) {
     const active = driver.toJSON().active;
     driver = await driver.save({ active: !active }, {patch: true});
-    if (driver.toJSON().active == !active){
-      res.status(200).json(driver.toJSON());
+    const driverJSON = driver.toJSON();
+    if (driverJSON.active == !active) {
+      if (driverJSON.active == true && driverJSON.user.device_id) {
+        res.sendPushNotification({
+          token: driver.user.device_id,
+          title: 'Tu cuenta ha sido activada',
+          body: 'Ya puedes tomar servicios!!'
+        });
+      } 
+      res.status(200).json(driverJSON);
     }
     else {
       res.status(422).json({errors: ['El status del conductor no pudo ser cambiado']});
