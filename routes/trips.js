@@ -42,7 +42,7 @@ router.post('/', helpers.requireAuthentication, validateTrip.validate, async (re
     
     // Send push notifications to all active drivers
     new Driver()
-      .where({ status: 'free' })
+      .where({ status: 'free', push_notifications: true })
       .fetchAll({ withRelated: ['user'] })
       .then(rows => {
         if (rows) {
@@ -51,6 +51,7 @@ router.post('/', helpers.requireAuthentication, validateTrip.validate, async (re
             drivers
               .filter(item => item.user.device_id)
               .forEach(driver => {
+                console.log('Push to driver', driver.id);
                 res.sendPushNotification({
                   token: driver.user.device_id,
                   title: 'Nuevo servicio',
