@@ -127,7 +127,7 @@ router.put('/driver/:id/activate', async (req, res, next) => {
     if (driverJSON.active == !active) {
       if (driverJSON.active == true && driverJSON.user.device_id) {
         res.sendPushNotification({
-          token: driver.user.device_id,
+          token: driverJSON.user.device_id,
           title: 'Tu cuenta ha sido activada',
           body: 'Ya puedes tomar servicios!!'
         });
