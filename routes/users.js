@@ -4,6 +4,7 @@ const SHA256 = require('crypto-js/sha256');
 const authToken = require('../lib/auth-token');
 const User = require('../models/user');
 const Trip = require('../models/trip');
+const Driver = require('../models/driver');
 const helpers = require('../lib/helpers');
 const firebase = require('../firebase');
 const userValidation = require('../validations/models/user');
@@ -48,24 +49,16 @@ router.post('/signup', userValidation.validate, async (req, res, next) => {
 });
 
 router.post('/login', async (req, res, next) => {
-  const { email, password, device_id = null } = req.body;
-  let user = await new User({email}).fetch();
+  let { email, password, full_name = null, device_id = null, provider = null } = req.body;
+
+  let user = await new User().findOrCreate({
+      email, password, full_name, provider
+  });
+
   if (user){
-    const password_hash = SHA256(`${password}`).toString();
-    user_password = user.toJSON({visibility: false}).password_hash;
-    if (user_password === password_hash){
-      if (device_id) user = await user.storeDeviceId(device_id);
-      user = user.toJSON();
-      const token = authToken.encode({
-        id: user.id,
-        email: user.email,
-        role: 'customer'
-      });
-      res.status(200).json({ jwt: token });
-    }
-    else {
-      res.status(422).json({errors: ['El email o la contraseña son incorrectos']});
-    }
+    jwt = await user.login(password, device_id);
+    if (jwt) { res.status(200).json({ jwt }); }
+    else {res.status(422).json({errors: ['El email o la contraseña son incorrectos']}); }
   }
   else {
     res.status(422).json({errors: ['El email o la contraseña son incorrectos']});
@@ -121,28 +114,32 @@ router.put('/cancel_trip', helpers.requireAuthentication, async (req, res, next)
     let trip = await user.activeTrip();
     if (trip) {
       trip = await trip.cancelTrip();
-      if (trip.toJSON().status == 'canceled'){
+      let tripJSON = trip.toJSON();
+      if (tripJSON.driver) {
+        await new Driver({id: tripJSON.driver.id}).save({status: 'free'}, {patch: true});
+      }
+      if (tripJSON.status == 'canceled'){
         trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle']});
 
         firebase
           .database()
           .ref('server/holding_trips/')
-          .child(trip.toJSON().id)
+          .child(tripJSON.id)
           .remove();
 
         firebase
           .database()
           .ref('server/taken_trips/')
-          .child(trip.toJSON().id)
+          .child(tripJSON.id)
           .remove();
 
-        res.status(200).json(trip.toJSON());
+        res.status(200).json(tripJSON);
       }
       else
-        res.status(422).json({errors: ['No se pudo actualizar el status del Viaje']});
+        res.status(422).json({errors: ['No se pudo actualizar el estatus del Viaje']});
     }
     else
-      res.status(404).json({errors: ['El usuario no tiene ningun trip activo']});
+      res.status(200).json({ message: 'El usuario no tiene ningun servicio activo' });
   }
   else
     res.status(404).json({errors: ['No se pudo encontrar el Usuario']});

@@ -125,12 +125,14 @@ router.put('/accept_trip', helpers.requireAuthentication, async (req, res, next)
         token: trip.toJSON().user.device_id
       };
 
-      firebase.messaging().send(message)
-        .then((resp) => {
-          console.log('Message sent successfully:', resp);
-        }).catch((err) => {
-          console.log('Failed to send the message:', err);
-        });
+      if(trip.toJSON().user.device_id) {
+        firebase.messaging().send(message)
+          .then((resp) => {
+            console.log('Message sent successfully:', resp);
+          }).catch((err) => {
+            console.log('Failed to send the message:', err);
+          });
+      }
 
       res.status(200).json(trip.toJSON());
     }

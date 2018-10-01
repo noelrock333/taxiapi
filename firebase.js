@@ -3,7 +3,7 @@ var firebaseConfig = require('./firebaseconfig.json');
 
 firebase.initializeApp({
   credential: firebase.credential.cert(firebaseConfig),
-  databaseURL: "https://cytio-10a47.firebaseio.com"
+  databaseURL: process.env.REALTIMEDATABASE_URL
 });
 
-module.exports = firebase
+module.exports = firebase;

@@ -39,6 +39,7 @@ app.use(bodyParser.urlencoded({limit: '5mb', extended: true}));
 app.use(cookieParser());
 app.use(function(req, res, next){
   res.io = io;
+  res.sendPushNotification = sendPushNotification;
   next();
 });
 app.use(express.static(path.join(__dirname, 'public')));
@@ -145,7 +146,7 @@ function sendPushNotification(options) {
       },
       token: options.token
     };
-  
+
     firebase.messaging().send(message)
       .then((resp) => {
         console.log('Message sent successfully:', resp);

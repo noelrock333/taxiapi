@@ -3,6 +3,7 @@ const router = express.Router();
 const helpers = require('../lib/helpers');
 const Trip = require('../models/trip');
 const User = require('../models/user');
+const Driver = require('../models/driver');
 const validateTrip = require('../validations/models/trip');
 const firebase = require('../firebase');
 
@@ -10,7 +11,8 @@ router.post('/', helpers.requireAuthentication, validateTrip.validate, async (re
   let {
     address_origin,
     lat_origin,
-    lng_origin
+    lng_origin,
+    references
   } = req.body;
 
   let user_id = req.user.id;
@@ -24,7 +26,8 @@ router.post('/', helpers.requireAuthentication, validateTrip.validate, async (re
     address_origin,
     lat_origin,
     lng_origin,
-    user_id
+    user_id,
+    references: references || ''
   }).save();
 
   if (trip){
@@ -36,6 +39,27 @@ router.post('/', helpers.requireAuthentication, validateTrip.validate, async (re
       .ref('server/holding_trips/')
       .child(trip.toJSON().id)
       .set({...trip.toJSON(), timestamp: new Date(trip.toJSON().created_at).getTime()})
+    
+    // Send push notifications to all active drivers
+    new Driver()
+      .where({ status: 'free' })
+      .fetchAll({ withRelated: ['user'] })
+      .then(rows => {
+        if (rows) {
+          let drivers = rows.toJSON();
+          if (Array.isArray(drivers)) {
+            drivers
+              .filter(item => item.user.device_id)
+              .forEach(driver => {
+                res.sendPushNotification({
+                  token: driver.user.device_id,
+                  title: 'Nuevo servicio',
+                  body: 'Puede haber un servicio cercano'
+                });
+              });
+          }
+        }
+      })
 
     res.status(201).json(trip.toJSON());
   }
