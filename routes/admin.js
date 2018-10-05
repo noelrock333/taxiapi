@@ -11,7 +11,6 @@ const Trip = require('../models/trip');
 const firebase = require('../firebase');
 const bookshelf = require('../bookshelf');
 const knex = require('../knex')
-// C:\Users\ifell\Desktop\cityo\taxiapi\knex.js
 
 // User routes
 
