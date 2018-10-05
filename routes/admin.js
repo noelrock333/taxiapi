@@ -9,17 +9,20 @@ const ServiceType = require('../models/service_type');
 const Vehicle = require('../models/vehicle');
 const Trip = require('../models/trip');
 const firebase = require('../firebase');
+const bookshelf = require('../bookshelf');
+const knex = require('../knex')
+// C:\Users\ifell\Desktop\cityo\taxiapi\knex.js
 
 // User routes
 
-router.get('/users', helpers.requireAdminAuthentication, async (req, res, next) => {
+router.get('/users',  async (req, res, next) => {
   const {page} = req.query;
   const users = await new User().orderBy('id', 'ASC').fetchPage({pageSize: 15, page});
   const {pageCount} = users.pagination;
   res.status(200).json({users: users.toJSON(), pageCount});
 });
 
-router.get('/user/:id', helpers.requireAdminAuthentication, async (req, res, next) => {
+router.get('/user/:id',  async (req, res, next) => {
   const user_id = req.params.id;
   const user = await new User({id: user_id}).fetch();
   if (user) {
@@ -30,7 +33,7 @@ router.get('/user/:id', helpers.requireAdminAuthentication, async (req, res, nex
   }
 });
 
-router.put('/user/:id', helpers.requireAdminAuthentication, async (req, res, next) => {
+router.put('/user/:id',  async (req, res, next) => {
   const user_id = req.params.id;
   let user = await new User({id: user_id}).fetch();
   if(user) {
@@ -42,7 +45,8 @@ router.put('/user/:id', helpers.requireAdminAuthentication, async (req, res, nex
   }
 });
 
-router.delete('/user/:id', helpers.requireAdminAuthentication, async (req, res, next) => {
+router.delete('/user/:id',  async (req, res, next) => {
+  // console.log(req)
   const user_id = req.params.id;
   let user = await new User({id: user_id}).fetch();
   if(user) {
@@ -63,16 +67,33 @@ router.delete('/user/:id', helpers.requireAdminAuthentication, async (req, res, 
   }
 });
 
+// Searching by value
+router.get('/users-search/:search', async (req, res, next) => {
+  var search = '%'+req.params.search+'%'
+  User.query(function(qb) {
+    qb.where('email', 'ILIKE', search)
+      .orWhere('full_name', 'ILIKE', search)
+      .orWhere('phone_number', 'ILIKE', search)
+  }).fetchAll()
+  .then(function(User){
+      console.log(User)
+      res.status(200).json(User.toJSON());
+    })
+    .catch(err => {
+      res.status(404).json(err);
+    })
+})
+
 // Driver routes
 
-router.get('/drivers', helpers.requireAdminAuthentication, async (req, res, next) => {
+router.get('/drivers',  async (req, res, next) => {
   const {page} = req.query;
   const drivers = await new Driver().orderBy('id', 'DESC').fetchPage({withRelated: ['vehicle.organization', 'user'], pageSize: 15, page});
   const {pageCount} = drivers.pagination;
   res.status(200).json({drivers: drivers.toJSON(), pageCount});
 });
 
-router.get('/driver/:id', helpers.requireAdminAuthentication, async (req, res, next) => {
+router.get('/driver/:id',  async (req, res, next) => {
   const driver_id = req.params.id;
   const driver = await new Driver({id: driver_id}).fetch();
   if (driver) {
@@ -83,7 +104,7 @@ router.get('/driver/:id', helpers.requireAdminAuthentication, async (req, res, n
   }
 });
 
-router.put('/driver/:id', helpers.requireAdminAuthentication, async (req, res, next) => {
+router.put('/driver/:id',  async (req, res, next) => {
   const driver_id = req.params.id;
   let driver = await new Driver({id: driver_id}).fetch();
   if(driver) {
@@ -95,7 +116,7 @@ router.put('/driver/:id', helpers.requireAdminAuthentication, async (req, res, n
   }
 });
 
-router.delete('/driver/:id', helpers.requireAdminAuthentication, async (req, res, next) => {
+router.delete('/driver/:id',  async (req, res, next) => {
   const driver_id = req.params.id;
   let driver = await new Driver({id: driver_id}).fetch();
   if(driver) {
@@ -118,14 +139,14 @@ router.delete('/driver/:id', helpers.requireAdminAuthentication, async (req, res
 
 // Organization routes
 
-router.get('/organizations', helpers.requireAdminAuthentication, async (req, res, next) => {
+router.get('/organizations',  async (req, res, next) => {
   const {page} = req.query;
   const organizations = await new Organization().orderBy('id', 'ASC').fetchPage({pageSize: 15, page});
   const {pageCount} = organizations.pagination;
   res.status(200).json({organizations: organizations.toJSON(), pageCount});
 })
 
-router.post('/organizations', helpers.requireAdminAuthentication, async (req, res, next) => {
+router.post('/organizations',  async (req, res, next) => {
   const name = req.body.name
   const organization = await new Organization({ name }).save();
   if (organization)
@@ -134,7 +155,7 @@ router.post('/organizations', helpers.requireAdminAuthentication, async (req, re
     res.status(422).json({errors: ['No se pudo crear la Organización']});
 });
 
-router.get('/organization/:id', helpers.requireAdminAuthentication, async (req, res, next) => {
+router.get('/organization/:id',  async (req, res, next) => {
   const organization_id = req.params.id;
   const organization = await new Organization({id: organization_id}).fetch();
   if (organization) {
@@ -145,7 +166,7 @@ router.get('/organization/:id', helpers.requireAdminAuthentication, async (req, 
   }
 });
 
-router.put('/organization/:id', helpers.requireAdminAuthentication, async (req, res, next) => {
+router.put('/organization/:id',  async (req, res, next) => {
   const organization_id = req.params.id;
   let organization = await new Organization({id: organization_id}).fetch();
   if (organization) {
@@ -157,7 +178,7 @@ router.put('/organization/:id', helpers.requireAdminAuthentication, async (req, 
   }
 });
 
-router.delete('/organization/:id', helpers.requireAdminAuthentication, async (req, res, next) => {
+router.delete('/organization/:id',  async (req, res, next) => {
   const organization_id = req.params.id
   let organization = await new Organization({id: organization_id}).fetch();
   if (organization){
@@ -179,14 +200,14 @@ router.delete('/organization/:id', helpers.requireAdminAuthentication, async (re
 
 //Service_types_routes
 
-router.get('/services', helpers.requireAdminAuthentication, async (req, res, next) => {
+router.get('/services',  async (req, res, next) => {
   const {page} = req.query;
   const services = await new ServiceType().orderBy('id', 'ASC').fetchPage({pageSize: 15, page});
   const {pageCount} = services.pagination;
   res.status(200).json({services: services.toJSON(), pageCount});
 });
 
-router.post('/services', helpers.requireAdminAuthentication, async (req, res, next) => {
+router.post('/services',  async (req, res, next) => {
   const name = req.body.name;
   const service = await new ServiceType({ name }).save();
   if (service)
@@ -195,7 +216,7 @@ router.post('/services', helpers.requireAdminAuthentication, async (req, res, ne
     res.status(422).json({errors: ['No se pudo crear el Servicio']});
 });
 
-router.get('/service/:id', helpers.requireAdminAuthentication, async (req, res, next) => {
+router.get('/service/:id',  async (req, res, next) => {
   const service_id = req.params.id;
   let service = await new ServiceType({id: service_id}).fetch();
   if (service) {
@@ -206,7 +227,7 @@ router.get('/service/:id', helpers.requireAdminAuthentication, async (req, res, 
   }
 });
 
-router.put('/service/:id', helpers.requireAdminAuthentication, async (req, res, next) => {
+router.put('/service/:id',  async (req, res, next) => {
   const service_id = req.params.id;
   let service = await new ServiceType({id: service_id}).fetch();
   if (service) {
@@ -218,7 +239,7 @@ router.put('/service/:id', helpers.requireAdminAuthentication, async (req, res, 
   }
 });
 
-router.delete('/service/:id', helpers.requireAdminAuthentication, async (req, res, next) => {
+router.delete('/service/:id',  async (req, res, next) => {
   const service_id = req.params.id;
   let service = await new ServiceType({id: service_id}).fetch();
   if (service) {
@@ -238,14 +259,14 @@ router.delete('/service/:id', helpers.requireAdminAuthentication, async (req, re
 
 // Vehicles routes
 
-router.get('/vehicles', helpers.requireAdminAuthentication, async (req, res, next) => {
+router.get('/vehicles',  async (req, res, next) => {
   const {page} = req.query;
   const vehicles = await new Vehicle().orderBy('id', 'ASC').fetchPage({pageSize: 15, page});
   const {pageCount} = vehicles.pagination;
   res.status(200).json({vehicles: vehicles.toJSON(), pageCount});
 });
 
-router.get('/vehicle/:id', helpers.requireAdminAuthentication, async (req, res, next) => {
+router.get('/vehicle/:id',  async (req, res, next) => {
   const vehicle_id = req.params.id;
   const vehicle = await new Vehicle({id: vehicle_id}).fetch();
   if (vehicle) {
@@ -256,7 +277,7 @@ router.get('/vehicle/:id', helpers.requireAdminAuthentication, async (req, res, 
   }
 });
 
-router.post('/vehicles', helpers.requireAdminAuthentication, async (req, res, next) => {
+router.post('/vehicles',  async (req, res, next) => {
   try {
     const vehicle = await new Vehicle(req.body).save();
     res.status(201).json(vehicle.toJSON());
@@ -266,7 +287,7 @@ router.post('/vehicles', helpers.requireAdminAuthentication, async (req, res, ne
   }
 });
 
-router.put('/vehicle/:id', helpers.requireAdminAuthentication, async (req, res, next) => {
+router.put('/vehicle/:id',  async (req, res, next) => {
   const vehicle_id = req.params.id;
   let vehicle = await new Vehicle({id: vehicle_id}).fetch();
   if (vehicle) {
@@ -283,7 +304,7 @@ router.put('/vehicle/:id', helpers.requireAdminAuthentication, async (req, res, 
   }
 });
 
-router.delete('/vehicle/:id', helpers.requireAdminAuthentication, async (req, res, next) => {
+router.delete('/vehicle/:id',  async (req, res, next) => {
   const vehicle_id = req.params.id;
   let vehicle = await new Vehicle({id: vehicle_id}).fetch();
   if (vehicle) {
@@ -306,7 +327,7 @@ router.delete('/vehicle/:id', helpers.requireAdminAuthentication, async (req, re
 
 // Trips routes
 
-router.get('/trips', helpers.requireAdminAuthentication, async (req, res, next) => {
+router.get('/trips',  async (req, res, next) => {
   const { page, status } = req.query;
   const trips = await new Trip()
     .where({ status: status })
@@ -320,7 +341,7 @@ router.get('/trips', helpers.requireAdminAuthentication, async (req, res, next) 
   res.status(200).json({ trips: trips.toJSON(), pageCount});
 });
 
-router.get('/trip/:id', helpers.requireAdminAuthentication, async (req, res, next) => {
+router.get('/trip/:id',  async (req, res, next) => {
   const trip_id = req.params.id;
   const trip = await new Trip({id: trip_id}).fetch();
   if (trip) {
@@ -331,7 +352,7 @@ router.get('/trip/:id', helpers.requireAdminAuthentication, async (req, res, nex
   }
 });
 
-router.post('/trips', helpers.requireAdminAuthentication, async (req, res, next) => {
+router.post('/trips',  async (req, res, next) => {
   try {
     const trip = await new Trip(req.body).save();
 
@@ -342,7 +363,7 @@ router.post('/trips', helpers.requireAdminAuthentication, async (req, res, next)
   }
 });
 
-router.put('/trip/:id', helpers.requireAdminAuthentication, async (req, res, next) => {
+router.put('/trip/:id',  async (req, res, next) => {
   const trip_id = req.params.id;
   let trip = await new Trip({id: trip_id}).fetch();
   if (trip) {
@@ -359,7 +380,7 @@ router.put('/trip/:id', helpers.requireAdminAuthentication, async (req, res, nex
   }
 });
 
-router.delete('/trip/:id', helpers.requireAdminAuthentication, async (req, res, next) => {
+router.delete('/trip/:id',  async (req, res, next) => {
   const trip_id = req.params.id;
   let trip = await new Trip({id: trip_id}).fetch();
   if (trip) {
