@@ -9,8 +9,6 @@ const ServiceType = require('../models/service_type');
 const Vehicle = require('../models/vehicle');
 const Trip = require('../models/trip');
 const firebase = require('../firebase');
-const bookshelf = require('../bookshelf');
-const knex = require('../knex')
 
 // User routes
 
@@ -66,8 +64,8 @@ router.delete('/user/:id', helpers.requireAdminAuthentication, async (req, res, 
 });
 
 // Searching by value
-router.get('/users-search/:search', helpers.requireAdminAuthentication ,async (req, res, next) => {
-  var search = '%'+req.params.search+'%'
+router.get('/users-search/:search', helpers.requireAdminAuthentication, async (req, res, next) => {
+  var search = `%${req.params.search}%`
   User.query(function(qb) {
     qb.where('email', 'ILIKE', search)
       .orWhere('full_name', 'ILIKE', search)
