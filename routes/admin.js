@@ -72,7 +72,6 @@ router.get('/users-search/:search', helpers.requireAdminAuthentication, async (r
       .orWhere('phone_number', 'ILIKE', search)
   }).fetchAll()
   .then(function(User){
-      console.log(User)
       res.status(200).json(User.toJSON());
     })
     .catch(err => {
