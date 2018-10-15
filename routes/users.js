@@ -121,6 +121,14 @@ router.put('/cancel_trip', helpers.requireAuthentication, async (req, res, next)
       if (tripJSON.status == 'canceled'){
         trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle']});
 
+        if (trip.driver) {
+          res.sendPushNotification({
+            token: trip.toJSON().driver.user.device_id,
+            title: 'Servicio Cancelado',
+            body: 'El usuario ha cancelado el servicio'
+          });
+        }
+
         firebase
           .database()
           .ref('server/holding_trips/')

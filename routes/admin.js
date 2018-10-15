@@ -135,8 +135,26 @@ router.put('/driver/:id/activate', async (req, res, next) => {
       res.status(200).json(driverJSON);
     }
     else {
-      res.status(422).json({errors: ['El status del conductor no pudo ser cambiado']});
+      res.status(422).json({errors: ['El status del Conductor no pudo ser cambiado']});
     }
+  }
+  else {
+    res.status(404).json({errors: ['Este Conductor no existe']});
+  }
+});
+
+router.post('/driver/:id/notify', async (req, res, next) => {
+  const driver_id = req.params.id;
+  const { title, body } = req.body;
+  let driver = await new Driver({id: driver_id}).fetch({ withRelated: ['user'] });
+  if (driver) {
+    let driverJSON = driver.toJSON();
+    res.sendPushNotification({
+      token: driverJSON.user.device_id,
+      title: title,
+      body: body
+    });
+    res.status(200).json(driverJSON);
   }
   else {
     res.status(404).json({errors: ['Este Conductor no existe']});
