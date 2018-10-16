@@ -1,0 +1,32 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/amv-microservices
+    docker:
+      - image: circleci/node:10-browsers
+        environment:
+          NODE_ENV: test
+      - image: circleci/postgres:10-alpine-postgis-ram
+
+    steps:
+      - checkout
+      - restore_cache:
+          key: node-modules-{{ checksum "package-lock.json" }}
+      - run:
+          name: Instal dependencies
+          command: npm install
+      - save_cache:
+          key: node-modules-{{ checksum "package-lock.json" }}
+          paths:
+            - ./node_modules
+      - run:  # special utility that stalls main process until tcp is ready
+          name: Wait for DB
+          command: dockerize -wait tcp://localhost:4572 -timeout 1m
+      - run:
+          name: Test
+          command: |
+            npm test --ci --coverage --maxWorkers 2
+      - store_artifacts:
+          path: coverage
+      - store_test_results:
+          path: junit.xml
