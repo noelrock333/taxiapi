@@ -28,7 +28,7 @@ jobs:
       - run:
           name: setup
           command: |
-            createdb taxidb
+            npx createdbjs taxidb --user=postgres --pasword=postgres
             npx knex migrate
       - run:
           name: Test
