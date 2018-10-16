@@ -1,9 +1,16 @@
-var firebase = require("firebase-admin");
-var firebaseConfig = require('./firebaseconfig.json');
+const firebase = require('firebase-admin')
+const { existsSync } = require('fs')
+const path = require('path')
 
-firebase.initializeApp({
-  credential: firebase.credential.cert(firebaseConfig),
+const firebaseConfig = {
   databaseURL: process.env.REALTIMEDATABASE_URL
-});
+}
 
-module.exports = firebase;
+if (process.env.NODE_ENV == 'production' || existsSync(path.join(__dirname, './firebaseconfig.json'))) {
+  const firebaseConfig = require('./firebaseconfig.json')
+  firebaseConfig.credential = firebase.credential.cert(firebaseConfig)
+}
+
+firebase.initializeApp(firebaseConfig)
+
+module.exports = firebase
