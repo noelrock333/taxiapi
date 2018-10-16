@@ -6,6 +6,8 @@ jobs:
       - image: circleci/node:10-browsers
         environment:
           NODE_ENV: test
+          DATABASE_URL: 'postgres://postgres:postgres@127.0.0.1:5432/taxidb'
+          JWT_SECRET: "foobarfoobar"
       - image: circleci/postgres:10-alpine-postgis-ram
 
     steps:
@@ -19,9 +21,14 @@ jobs:
           key: node-modules-{{ checksum "package-lock.json" }}
           paths:
             - ./node_modules
-      - run:  # special utility that stalls main process until tcp is ready
+      - run:
           name: Wait for DB
           command: dockerize -wait tcp://localhost:4572 -timeout 1m
+      - run:
+          name: setup
+          command: |
+            createdb taxidb
+            npx knex migrate
       - run:
           name: Test
           command: |
