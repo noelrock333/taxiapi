@@ -3,8 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www",
-    "test": "jest"
+    "start": "node ./bin/www"
   },
   "dependencies": {
     "@sendgrid/mail": "^6.3.1",
@@ -13,14 +12,12 @@
     "cookie-parser": "~1.4.3",
     "cors": "^2.8.4",
     "crypto-js": "^3.1.9-1",
-    "cypress": "^3.1.0",
     "debug": "~2.6.9",
     "ejs": "~2.5.7",
     "express": "~4.16.0",
     "firebase-admin": "^5.13.1",
     "geodist": "^0.2.1",
     "http-errors": "~1.6.2",
-    "jest": "^23.6.0",
     "jwt-simple": "^0.5.1",
     "knex": "0.13.0",
     "moment": "^2.22.0",
@@ -31,13 +28,9 @@
     "pg": "^7.4.1",
     "socket.io": "^2.1.0",
     "uuid": "^3.3.2",
-    "validate.js": "^0.12.0",
-    "wait-on": "^3.1.0"
+    "validate.js": "^0.12.0"
   },
   "devDependencies": {
-    "cypress-testing-library": "^2.3.1",
-    "dotenv": "^5.0.1",
-    "firebase-mock": "^2.2.10",
-    "firebase-server": "^1.0.0"
+    "dotenv": "^5.0.1"
   }
 }
