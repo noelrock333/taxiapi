@@ -33,7 +33,7 @@ jobs:
       - run:
           name: Test
           command: |
-            npm test --ci --coverage --maxWorkers 2
+            npm run test:ci
             npx firebase-server -p 5000 -e -b && npx wait-on http://localhost:5000
             npm start & npx wait-on http://localhost:3000
             npx cypress run
