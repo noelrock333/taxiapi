@@ -15,6 +15,8 @@ jobs:
       - checkout
       - restore_cache:
           key: node-modules-{{ checksum "package-lock.json" }}
+      - restore_cache:
+          key: cypress
       - run:
           name: Instal dependencies
           command: npm install
@@ -22,6 +24,10 @@ jobs:
           key: node-modules-{{ checksum "package-lock.json" }}
           paths:
             - ./node_modules
+      - save_cache:
+          key: cypress
+          paths:
+            - ~/.cache/Cypress
       - run:
           name: Wait for DB
           command: dockerize -wait tcp://localhost:5432 -timeout 1m
