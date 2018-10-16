@@ -40,8 +40,10 @@ jobs:
           name: Test
           command: |
             npm run test:ci
-            npx firebase-server -p 5000 -e -b && npx wait-on http://localhost:5000
-            npm start & npx wait-on http://localhost:3000
+            DEBUG=firebase-server* npx firebase-server -p 5000 -e -b
+            dockerize -wait tcp://localhost:5000 -timeout 1m
+            npm start &
+            dockerize -wait http://localhost:3000 -timeout 1m
             npx cypress run
       - store_artifacts:
           path: coverage
