@@ -1,7 +1,7 @@
 version: 2
 jobs:
   build:
-    working_directory: ~/amv-microservices
+    working_directory: ~/taxiapi
     docker:
       - image: circleci/node:10-browsers
         environment:
