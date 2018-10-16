@@ -24,7 +24,7 @@ jobs:
             - ./node_modules
       - run:
           name: Wait for DB
-          command: dockerize -wait tcp://localhost:4572 -timeout 1m
+          command: dockerize -wait tcp://localhost:5432 -timeout 1m
       - run:
           name: setup
           command: |
