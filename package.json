@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "test": "source .testenv && jest",
-    "test:ci": ". testenv && jest --ci --coverage --maxWorkers=2 --forceExit"
+    "test": "$(cat testenv) && jest",
+    "test:ci": "$(cat testenv) && jest --ci --coverage --maxWorkers=2 --forceExit"
   },
   "dependencies": {
     "@sendgrid/mail": "^6.3.1",
