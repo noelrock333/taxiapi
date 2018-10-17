@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "test": "NODE_ENV=test JWT_SECRET=auth-token-test jest",
-    "test:ci": "NODE_ENV=test JWT_SECRET=auth-token-test jest --ci --coverage --maxWorkers=2"
+    "test": "source .testenv && jest",
+    "test:ci": "source .testenv && jest --ci --coverage --maxWorkers=2 --forceExit"
   },
   "dependencies": {
     "@sendgrid/mail": "^6.3.1",
