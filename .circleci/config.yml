@@ -44,7 +44,7 @@ jobs:
             dockerize -wait tcp://localhost:5000 -timeout 1m
             npm start &
             dockerize -wait http://localhost:3000 -timeout 1m
-            npx cypress run
+            # npx cypress run
       - store_artifacts:
           path: coverage
       - store_test_results:
