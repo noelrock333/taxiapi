@@ -79,7 +79,7 @@ router.get('/geocode', helpers.requireAuthentication, (req, res, next) => {
           let address = response.data.results.filter(item => {
             return item.types.includes('street_address');
           }).map(item => {
-            return item.formatted_address;
+            return { address: item.formatted_address, type: item.geometry.location_type };
           });
           res.status(200).json(address);
         } else {
