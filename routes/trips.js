@@ -6,6 +6,7 @@ const User = require('../models/user');
 const Driver = require('../models/driver');
 const validateTrip = require('../validations/models/trip');
 const firebase = require('../firebase');
+const axios = require('axios');
 
 router.post('/', helpers.requireAuthentication, validateTrip.validate, async (req, res, next) => {
   let {
@@ -67,5 +68,30 @@ router.post('/', helpers.requireAuthentication, validateTrip.validate, async (re
   else
     res.status(422).json({errors: ['No se pudo crear el viaje']});
 });
+
+router.get('/geocode', helpers.requireAuthentication, (req, res, next) => {
+  const { lat, lng } = req.query;
+  if (lat && lng) {
+    axios
+      .get(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${process.env.MAPS_GEOCODE_KEY}`)
+      .then(response => {
+        if (response.data && response.data.results) {
+          let address = response.data.results.filter(item => {
+            return item.types.includes('street_address');
+          }).map(item => {
+            return item.formatted_address;
+          });
+          res.status(200).json(address);
+        } else {
+          res.status(422).json({ message: 'Dirección no encontrada' })
+        }
+      })
+      .catch(err => {
+        res.status(422).json(err);
+      })
+  } else {
+    res.status(422).json({ message: 'Se requiere latitud y longitud' });
+  }
+})
 
 module.exports = router;
