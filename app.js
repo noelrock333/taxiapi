@@ -133,6 +133,8 @@ function sendPushNotification(options) {
         body: options.body,
       },
       android: {
+        ttl: 540000, // 9 minutes
+        priority: 'high',
         notification: {
           sound: 'default'
         }
