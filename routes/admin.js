@@ -10,6 +10,7 @@ const Vehicle = require('../models/vehicle');
 const Trip = require('../models/trip');
 const BlackList = require('../models/blacklist');
 const firebase = require('../firebase');
+const DriversView = require('../models/drivers_view')
 
 // User routes
 
@@ -64,11 +65,28 @@ router.delete('/user/:id', helpers.requireAdminAuthentication, async (req, res, 
   }
 });
 
+router.get('/users-search', helpers.requireAdminAuthentication, async (req, res, next) => {
+  const search = `%${req.query.search}%`
+  const page = req.query.page;
+  User.query(function(qb) {
+    qb.where('email', 'ILIKE', search)
+      .orWhere('full_name', 'ILIKE', search)
+      .orWhere('phone_number', 'ILIKE', search)
+  }).fetchPage({pageSize: 15, page})
+  .then(function(User){
+      const {pageCount} = User.pagination
+      res.status(200).json({users: User.toJSON(), pageCount});
+    })
+    .catch(err => {
+      res.status(404).json(err);
+    })
+})
+
 // Driver routes
 
 router.get('/drivers', helpers.requireAdminAuthentication, async (req, res, next) => {
   const {page} = req.query;
-  const drivers = await new Driver().orderBy('id', 'DESC').fetchPage({withRelated: ['vehicle.organization', 'user'], pageSize: 15, page});
+  const drivers = await new DriversView().orderBy('id', 'DESC').fetchPage({withRelated: ['vehicle.organization', 'user'], pageSize: 15, page});
   const {pageCount} = drivers.pagination;
   res.status(200).json({drivers: drivers.toJSON(), pageCount});
 });
@@ -160,6 +178,26 @@ router.post('/driver/:id/notify', async (req, res, next) => {
     res.status(404).json({errors: ['Este Conductor no existe']});
   }
 });
+
+router.get('/drivers-search', helpers.requireAdminAuthentication, async (req, res, next) => {
+  const search = `%${req.query.search}%`
+  const page = req.query.page;
+  
+  DriversView.query(function(qb) {
+    qb.where('email', 'ILIKE', search)
+      .orWhere('full_name', 'ILIKE', search)
+      .orWhere('phone_number', 'ILIKE', search)
+      .orWhere('license_number', 'ILIKE', search)
+  })
+  .fetchPage({pageSize: 15, page})
+  .then(function(DriversView){
+    const {pageCount} = DriversView.pagination
+    res.status(200).json({drivers: DriversView.toJSON(), pageCount});
+  })
+  .catch(err => {
+    res.status(404).json(err);
+  });
+})
 
 // Organization routes
 
