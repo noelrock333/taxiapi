@@ -161,7 +161,7 @@ router.put('/driver/:id/activate', async (req, res, next) => {
   }
 });
 
-router.post('/driver/:id/notify', async (req, res, next) => {
+router.post('/driver/:id/notify', helpers.requireAdminAuthentication, async (req, res, next) => {
   const driver_id = req.params.id;
   const { title, body } = req.body;
   let driver = await new Driver({id: driver_id}).fetch({ withRelated: ['user'] });
