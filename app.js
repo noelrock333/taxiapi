@@ -85,6 +85,7 @@ io.on('connection', socket => {
 cron.schedule("0 */5 * * * *", function() {
   console.log('Clear old trips');
   clearTrips();
+  finishTripReminder();
 });
 
 function clearTrips() {
@@ -120,6 +121,31 @@ function clearTrips() {
               qb.whereIn('id', oldTripsIds) 
             }).save({ status: 'canceled' }, { patch: true});
         }
+      }
+    });
+}
+
+function finishTripReminder() {
+  new Trip()
+    .query(function(qb) {
+      qb.whereRaw("age(now(), created_at) > '25 minutes'");
+    })
+    .where({ status: 'active' })
+    .fetchAll({ withRelated: ['driver.user'] })
+    .then(trips => {
+      if (trips) {
+        var oldTrips = trips.toJSON();
+        var oldTripsIds = oldTrips.map(item => item.id)
+        
+        console.log('Sending reminders', oldTripsIds);
+
+        oldTrips.forEach(trip => {
+          sendPushNotification({ 
+            token: trip.driver.user.device_id,
+            title: '¿Olvidaste finalizar un servicio?',
+            body: 'Finaliza para ver más servicios'
+          });
+        })
       }
     });
 }

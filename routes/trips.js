@@ -55,7 +55,7 @@ router.post('/', helpers.requireAuthentication, validateTrip.validate, async (re
                 res.sendPushNotification({
                   token: driver.user.device_id,
                   title: 'Nuevo servicio',
-                  body: 'Puede haber un servicio cercano'
+                  body: 'Se ha creado un nuevo servicio'
                 });
               });
           }

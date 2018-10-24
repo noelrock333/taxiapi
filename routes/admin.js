@@ -153,8 +153,26 @@ router.put('/driver/:id/activate', async (req, res, next) => {
       res.status(200).json(driverJSON);
     }
     else {
-      res.status(422).json({errors: ['El status del conductor no pudo ser cambiado']});
+      res.status(422).json({errors: ['El status del Conductor no pudo ser cambiado']});
     }
+  }
+  else {
+    res.status(404).json({errors: ['Este Conductor no existe']});
+  }
+});
+
+router.post('/driver/:id/notify', helpers.requireAdminAuthentication, async (req, res, next) => {
+  const driver_id = req.params.id;
+  const { title, body } = req.body;
+  let driver = await new Driver({id: driver_id}).fetch({ withRelated: ['user'] });
+  if (driver) {
+    let driverJSON = driver.toJSON();
+    res.sendPushNotification({
+      token: driverJSON.user.device_id,
+      title: title,
+      body: body
+    });
+    res.status(200).json(driverJSON);
   }
   else {
     res.status(404).json({errors: ['Este Conductor no existe']});
@@ -164,19 +182,21 @@ router.put('/driver/:id/activate', async (req, res, next) => {
 router.get('/drivers-search', helpers.requireAdminAuthentication, async (req, res, next) => {
   const search = `%${req.query.search}%`
   const page = req.query.page;
+  
   DriversView.query(function(qb) {
     qb.where('email', 'ILIKE', search)
       .orWhere('full_name', 'ILIKE', search)
       .orWhere('phone_number', 'ILIKE', search)
       .orWhere('license_number', 'ILIKE', search)
-  }).fetchPage({pageSize: 15, page})
+  })
+  .fetchPage({pageSize: 15, page})
   .then(function(DriversView){
-      const {pageCount} = DriversView.pagination
-      res.status(200).json({drivers: DriversView.toJSON(), pageCount});
-    })
-    .catch(err => {
-      res.status(404).json(err);
-    })
+    const {pageCount} = DriversView.pagination
+    res.status(200).json({drivers: DriversView.toJSON(), pageCount});
+  })
+  .catch(err => {
+    res.status(404).json(err);
+  });
 })
 
 // Organization routes
