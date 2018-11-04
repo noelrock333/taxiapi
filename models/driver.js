@@ -16,6 +16,10 @@ const Driver = bookshelf.Model.extend({
     const Trip = require('./trip');
     return this.hasMany(Trip)
   },
+  locations: function(){
+    const Location = require('./location');
+    return this.hasMany(Location)
+  },
   blacklist: async function() {
     const BlackList = require('./blacklist');
     const blacklist_driver = await new BlackList().where({driver_id: this.id}).fetch();
