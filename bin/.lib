@@ -6,7 +6,7 @@ RAND2=$(cat /dev/urandom | env LC_CTYPE=C tr -cd 'a-f0-9' | head -c 8)
 
 DB_URL=$1
 DB_NAME=$2
-NAME=${3:-dump}
+NAME=${3:-dump.sql}
 TEMP_DB="$DB_NAME$RAND"
 TEMP_DB2="$DB_NAME$RAND2"
 

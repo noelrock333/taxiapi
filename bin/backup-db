@@ -7,4 +7,4 @@ validateDbName
 
 echo "Dumping $DB_URL/$DB_NAME to $NAME"
 
-pg_dump -f "$NAME" --format=c "$DB_URL/$DB_NAME"
+pg_dump -f "$NAME" -c -C -O -x --if-exists "$DB_URL/$DB_NAME"

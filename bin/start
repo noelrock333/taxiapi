@@ -2,5 +2,5 @@
 
 set -e
 
-curl "$FIREBASE_CREDS_PATH" -o firebaseconfig.json
-pm2 start bin/www -i max --no-daemon
+npx knex migrate:latest
+pm2-runtime start bin/www --json --web 8080
