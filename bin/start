@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+set -e
+
+curl "$FIREBASE_CREDS_PATH" -o firebaseconfig.json
+pm2 start bin/www -i max --no-daemon
