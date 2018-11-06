@@ -13,7 +13,7 @@ cat <<-EOF | psql "$DB_URL"
   CREATE DATABASE $TEMP_DB;
 EOF
 
-psql -f "$NAME" "$DB_URL/$TEMP_DB" 
+pg_restore --format=c --no-acl --no-owner --dbname="$DB_URL/$TEMP_DB" "$NAME" 
 
 echo "Terminating connections to $DB_NAME"
 cat <<-EOF | psql "$DB_URL"
