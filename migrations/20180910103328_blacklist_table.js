@@ -7,7 +7,7 @@ exports.up = function(knex, Promise) {
       t.unique('driver_id');
       t.string('reason');
 
-      t.foreign('driver_id').references('id').inTable('drivers');
+      t.foreign('driver_id').onDelete('CASCADE').references('id').inTable('drivers');
       t.timestamps();
   });
 };
