@@ -203,18 +203,19 @@ router.get('/drivers-search', helpers.requireAdminAuthentication, async (req, re
 
 router.get('/organizations', helpers.requireAdminAuthentication, async (req, res, next) => {
   const {page} = req.query;
-  const organizations = await new Organization().orderBy('id', 'ASC').fetchPage({pageSize: 15, page});
+  const organizations = await new Organization().orderBy('id', 'DESC').fetchPage({pageSize: 10, page});
   const {pageCount} = organizations.pagination;
   res.status(200).json({organizations: organizations.toJSON(), pageCount});
 })
 
 router.post('/organizations', helpers.requireAdminAuthentication, async (req, res, next) => {
-  const name = req.body.name
+  const name = req.query.name
   const organization = await new Organization({ name }).save();
-  if (organization)
+  if (organization){
     res.status(201).json(organization.toJSON());
-  else
+  }else{
     res.status(422).json({errors: ['No se pudo crear la Organización']});
+  }
 });
 
 router.get('/organization/:id', helpers.requireAdminAuthentication, async (req, res, next) => {
