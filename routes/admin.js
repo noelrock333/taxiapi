@@ -477,6 +477,39 @@ router.delete('/trip/:id', helpers.requireAdminAuthentication, async (req, res, 
   }
 });
 
+router.put('/finish_trip/:id', helpers.requireAdminAuthentication, async (req, res, next) => {
+  const trip_id = req.params.id;
+  let trip = await new Trip({id: trip_id}).fetch();
+
+  if (trip && trip.toJSON().status === 'active') {
+    trip = await trip.save({status: 'finished'}, {patch: true});
+    if (trip.toJSON().status == 'finished'){
+      let driver = await new Driver({id: trip.toJSON().driver_id}).fetch();
+      driver = await driver.save({status: 'free'}, {patch: true});
+      trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle.organization']});
+
+      firebase
+        .database()
+        .ref('server/taken_trips/')
+        .child(trip.toJSON().id)
+        .remove();
+
+      firebase
+        .database()
+        .ref('server/finished_trips/')
+        .child(trip.toJSON().id)
+        .set(trip.toJSON());
+
+      // res.io.in(`user-${trip.toJSON().user.id}`).emit('finishedTrip', trip.toJSON());
+      res.status(200).json(trip.toJSON());
+    }
+    else
+      res.status(422).json({errors: [ 'No se pudo actualizar el estado del Viaje' ]});
+  }else {
+    res.status(422).json({errors: [ 'El Conductor no puede finalizar el viaje si no lo ha iniciado' ]});
+  }
+});
+
 
 // BlackList routes
 
