@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -e
+
+RAND=$(cat /dev/urandom | env LC_CTYPE=C tr -cd 'a-f0-9' | head -c 8)
+RAND2=$(cat /dev/urandom | env LC_CTYPE=C tr -cd 'a-f0-9' | head -c 8)
+
+DB_URL=$1
+DB_NAME=$2
+NAME=${3:-dump}
+TEMP_DB="$DB_NAME$RAND"
+TEMP_DB2="$DB_NAME$RAND2"
+
+validateDbUrl() {
+  if [ -z "$DB_URL" ]; then 
+    echo "You need to provide an postgres url."
+    exit 1
+  fi
+}
+
+validateDbName() {
+  if [ -z "$DB_NAME" ]; then 
+   echo "You need to provide a table name."
+   exit 1
+  fi
+}
+
+validateFileName() {
+  if [ ! -f "$NAME" ]; then
+   echo "File $NAME not found!"
+   exit 1
+  fi
+}

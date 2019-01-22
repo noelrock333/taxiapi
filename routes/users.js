@@ -119,11 +119,9 @@ router.put('/cancel_trip', helpers.requireAuthentication, async (req, res, next)
         await new Driver({id: tripJSON.driver.id}).save({status: 'free'}, {patch: true});
       }
       if (tripJSON.status == 'canceled'){
-        trip = await trip.fetch({withRelated: ['user', 'driver.user','vehicle']});
-
-        if (trip.driver) {
+        if (tripJSON.driver) {
           res.sendPushNotification({
-            token: trip.toJSON().driver.user.device_id,
+            token: tripJSON.driver.user.device_id,
             title: 'Servicio Cancelado',
             body: 'El usuario ha cancelado el servicio'
           });

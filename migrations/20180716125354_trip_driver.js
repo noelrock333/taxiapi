@@ -22,8 +22,8 @@ exports.up = function(knex, Promise) {
           t.integer('service_type_id').unsigned().notNullable();
           t.integer('organization_id').unsigned().notNullable();
 
-          t.foreign('service_type_id').references('id').inTable('service_types');
-          t.foreign('organization_id').references('id').inTable('organizations');
+          t.foreign('service_type_id').onDelete('CASCADE').references('id').inTable('service_types');
+          t.foreign('organization_id').onDelete('CASCADE').references('id').inTable('organizations');
           t.unique('license_plate');
           t.timestamps();
         })
@@ -40,8 +40,8 @@ exports.up = function(knex, Promise) {
 
           t.unique('license_number');
 
-          t.foreign('user_id').references('id').inTable('users');
-          t.foreign('vehicle_id').references('id').inTable('vehicles')
+          t.foreign('user_id').onDelete('CASCADE').references('id').inTable('users');
+          t.foreign('vehicle_id').onDelete('CASCADE').references('id').inTable('vehicles')
 
           t.timestamps();
         })
@@ -60,9 +60,9 @@ exports.up = function(knex, Promise) {
           t.integer('driver_id').unsigned();
           t.integer('vehicle_id').unsigned();
 
-          t.foreign('user_id').references('id').inTable('users');
-          t.foreign('driver_id').references('id').inTable('drivers');
-          t.foreign('vehicle_id').references('id').inTable('vehicles');
+          t.foreign('user_id').onDelete('CASCADE').references('id').inTable('users');
+          t.foreign('driver_id').onDelete('CASCADE').references('id').inTable('drivers');
+          t.foreign('vehicle_id').onDelete('CASCADE').references('id').inTable('vehicles');
 
           t.timestamps();
         });

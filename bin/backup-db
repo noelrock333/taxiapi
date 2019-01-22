@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -e
+source bin/.lib
+
+validateDbUrl
+validateDbName
+
+echo "Dumping $DB_URL/$DB_NAME to $NAME"
+
+pg_dump -f "$NAME" --format=c "$DB_URL/$DB_NAME"
