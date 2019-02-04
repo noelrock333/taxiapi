@@ -6,16 +6,16 @@ validateDbUrl
 validateDbName
 validateFileName
 
-where="where pg_stat_activity.datname = '$DB_NAME'"
-
 echo "Restoring $NAME to $DB_URL/$TEMP_DB"
 cat <<-EOF | psql "$DB_URL"
   CREATE DATABASE $TEMP_DB;
 EOF
 
-pg_restore --format=c --no-acl --no-owner --dbname="$DB_URL/$TEMP_DB" "$NAME" 
+pg_restore --if-exists -n public --clean --format=c --no-acl --no-owner -x --dbname="$DB_URL/$TEMP_DB" "$NAME" 
 
 echo "Terminating connections to $DB_NAME"
+
+where="where pg_stat_activity.datname = '$DB_NAME'"
 cat <<-EOF | psql "$DB_URL"
 SELECT pg_terminate_backend(pg_stat_activity.pid)
 FROM pg_stat_activity

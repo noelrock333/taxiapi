@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+set -e
+
+npx knex migrate:latest
+pm2-runtime start bin/www --json --web 8080
