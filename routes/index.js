@@ -15,7 +15,7 @@ router.get('/terminos_y_condiciones', function(req, res, next) {
 });
 
 router.get('/ubicame/:guid', function(req, res, next) {
-  res.render('taxista');
+  res.render('locate');
 });
 
 module.exports = router;
