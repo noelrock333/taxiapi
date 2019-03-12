@@ -4,7 +4,7 @@ const DriverInfo = () => {
   return (
     <div className="info-card">
       <div className="title">Datos del taxista</div>
-      <div>
+      <div className="content">
         <div className="field-group">
           <label>Nombre:</label>
           <span>Noel Escobedo</span>

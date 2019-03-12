@@ -4,7 +4,7 @@ const VehicleInfo = () => {
   return (
     <div className="info-card">
       <div className="title">Datos del taxi</div>
-      <div>
+      <div className="content">
         <div className="field-group">
           <label>Sitio:</label>
           <span>Guadalajarita</span>

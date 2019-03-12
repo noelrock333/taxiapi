@@ -6,15 +6,28 @@ import Map from './components/Map';
 
 import './styles/main.scss';
 
-const App = () => {
-  return (<div>
-    <aside>
-      <DriverInfo />
-      <VehicleInfo />
-      <TripInfo />
-    </aside>
-    <Map />
-  </div>);
+class App extends React.Component {
+  componentDidMount() {
+    const guid = window.location.pathname.split('/').pop();
+    fetch(`/api/trips/traking/${guid}`)
+      .then(function(response) {
+        return response.json();
+      })
+      .then(function(myJson) {
+        console.log(myJson);
+      });
+  }
+
+  render() {
+    return (<div>
+      <aside>
+        <DriverInfo />
+        <VehicleInfo />
+        <TripInfo />
+      </aside>
+      <Map />
+    </div>);
+  }
 }
 
 export default App;
