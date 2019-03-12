@@ -91,7 +91,6 @@ module.exports = {
       template: path.join(__dirname, './webapp/public/index.html'),
       inject: true,
       filename: 'index.html',
-      prefix: '/locate',
     }),
     new HtmlWebpackPrefixPlugin(),
     new MiniCssExtractPlugin({
