@@ -3,6 +3,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPrefixPlugin = require('html-webpack-prefix-plugin');
 const autoprefixer = require('autoprefixer');
+const webpack = require('webpack');
 
 const CSSLoader = {
   loader: 'css-loader',
@@ -99,6 +100,11 @@ module.exports = {
     new MiniCssExtractPlugin({
       filename: '[name].css',
       chunkFilename: '[id].css',
+    }),
+    new webpack.DefinePlugin({
+        "process.env": {
+          TRACK_APP_BASE_URL: process.env.TRACK_APP_BASE_URL,
+        },
     }),
   ],
   resolve: {

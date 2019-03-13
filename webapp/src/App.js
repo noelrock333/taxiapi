@@ -9,13 +9,26 @@ import './styles/main.scss';
 class App extends React.Component {
   componentDidMount() {
     const guid = window.location.pathname.split('/').pop();
+    console.log(process.env.TRACK_APP_BASE_URL)
     fetch(`/api/trips/traking/${guid}`)
       .then(function(response) {
-        return response.json();
+        console.log(response);
+        if (response) {
+          console.log(response.json());
+        } else {
+          console.error('Ha ocurrido un error')
+        }
       })
-      .then(function(myJson) {
-        console.log(myJson);
+      .catch(error => {
+        console.log(error);
       });
+    // firebase
+    //   .database()
+    //   .ref(`server/tracking/${guid}`)
+    //   .on('value', snapshot => {
+    //     const trips = snapshot.val()
+    //     console.log(trips);
+    //   })
   }
 
   render() {
