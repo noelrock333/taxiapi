@@ -4,6 +4,9 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPrefixPlugin = require('html-webpack-prefix-plugin');
 const autoprefixer = require('autoprefixer');
 const webpack = require('webpack');
+if (!process.env.NODE_ENV) {
+  require('dotenv').config();
+}
 
 const CSSLoader = {
   loader: 'css-loader',
@@ -103,7 +106,7 @@ module.exports = {
     }),
     new webpack.DefinePlugin({
         "process.env": {
-          TRACK_APP_BASE_URL: process.env.TRACK_APP_BASE_URL,
+          TRACK_APP_BASE_URL: JSON.stringify(process.env.TRACK_APP_BASE_URL),
         },
     }),
   ],

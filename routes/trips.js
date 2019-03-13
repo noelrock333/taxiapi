@@ -88,7 +88,7 @@ router.get('/traking/:guid', async (req, res, next) => {
   const { guid } = req.params;
   try {
     let trip = await new Trip({ guid }).fetch({
-      withRelated: ['user', 'driver.user', 'vehicle'],
+      withRelated: ['user', 'driver.user', 'vehicle.organization'],
     });
     let tripJSON = trip.toJSON();
     if (tripJSON.status == 'active') {

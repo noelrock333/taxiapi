@@ -1,17 +1,18 @@
 import React from 'react';
 
-const DriverInfo = () => {
+const DriverInfo = ({ driver }) => {
+  const { user } = driver;
   return (
     <div className="info-card">
       <div className="title">Datos del taxista</div>
       <div className="content">
         <div className="field-group">
           <label>Nombre:</label>
-          <span>Noel Escobedo</span>
+          <span>{user.full_name}</span>
         </div>
         <div className="field-group">
           <label>Licencia:</label>
-          <span>1234567</span>
+          <span>{driver.license_number}</span>
         </div>
       </div>
     </div>
