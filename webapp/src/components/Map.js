@@ -20,7 +20,7 @@ export class MapContainer extends Component {
         }}
       >
         <Marker
-          title={'dirección de origen'}
+          title={'dirección de or'}
           name={'SOMA'}
           position={{ lat, lng }} />
       </Map>
@@ -29,5 +29,5 @@ export class MapContainer extends Component {
 }
 
 export default GoogleApiWrapper({
-  apiKey: 'AIzaSyDpHadZTD-Z9ln2ztCJGvAt7UI2PFG1N98'
+  apiKey: 'API_KEY'
 })(MapContainer);
