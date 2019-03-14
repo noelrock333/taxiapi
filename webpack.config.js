@@ -107,6 +107,7 @@ module.exports = {
     new webpack.DefinePlugin({
         "process.env": {
           TRACK_APP_BASE_URL: JSON.stringify(process.env.TRACK_APP_BASE_URL),
+          TRACK_APP_MAPS_GEOCODE_KEY: JSON.stringify(process.env.TRACK_APP_MAPS_GEOCODE_KEY),
         },
     }),
   ],

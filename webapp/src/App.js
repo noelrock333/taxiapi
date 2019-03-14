@@ -29,13 +29,6 @@ class App extends React.Component {
       .catch(error => {
         console.log(error);
       });
-    // firebase
-    //   .database()
-    //   .ref(`server/tracking/${guid}`)
-    //   .on('value', snapshot => {
-    //     const trips = snapshot.val()
-    //     console.log(trips);
-    //   })
   }
 
   render() {
