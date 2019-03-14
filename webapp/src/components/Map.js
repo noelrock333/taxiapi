@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Map, GoogleApiWrapper } from 'google-maps-react';
+import { Map, GoogleApiWrapper, Marker } from 'google-maps-react';
 
 const mapStyles = {
   width: '100%',
@@ -18,11 +18,16 @@ export class MapContainer extends Component {
          lat,
          lng
         }}
-      />
+      >
+        <Marker
+          title={'dirección de origen'}
+          name={'SOMA'}
+          position={{ lat, lng }} />
+      </Map>
     );
   }
 }
 
 export default GoogleApiWrapper({
-  apiKey: 'YOUR_GOOGLE_API_KEY_GOES_HERE'
+  apiKey: 'AIzaSyDpHadZTD-Z9ln2ztCJGvAt7UI2PFG1N98'
 })(MapContainer);
