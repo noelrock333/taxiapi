@@ -48,12 +48,12 @@ export class MapContainer extends Component {
         bounds={this.state.bounds}
       >
         {points && <Polyline
-          fillColor="#0000FF"
+          fillColor="#367edb"
           fillOpacity={0.35}
           path={points}
-          strokeColor="#0000FF"
+          strokeColor="#367edb"
           strokeOpacity={0.8}
-          strokeWeight={2}
+          strokeWeight={3}
         />}
         {points && <Marker
           title={'Posición actual'}
