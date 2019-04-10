@@ -8,7 +8,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var cors = require('cors');
 var bodyParser = require('body-parser');
-var cron = require("node-cron");
+var cron = require('node-cron');
 const firebase = require('./firebase');
 
 const Trip = require('./models/trip');
@@ -34,15 +34,16 @@ app.set('view engine', 'ejs');
 app.use(cors());
 app.use(logger('dev'));
 app.use('/uploads', express.static('uploads'));
-app.use(bodyParser.json({limit: '5mb', extended: true}));
-app.use(bodyParser.urlencoded({limit: '5mb', extended: true}));
+app.use(bodyParser.json({ limit: '5mb', extended: true }));
+app.use(bodyParser.urlencoded({ limit: '5mb', extended: true }));
 app.use(cookieParser());
-app.use(function(req, res, next){
+app.use(function(req, res, next) {
   res.io = io;
   res.sendPushNotification = sendPushNotification;
   next();
 });
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'views/locate')));
 
 app.use('/', indexRouter);
 app.use('/api/users', usersRouter);
@@ -82,7 +83,7 @@ io.on('connection', socket => {
   });
 });
 
-cron.schedule("0 */5 * * * *", function() {
+cron.schedule('0 */5 * * * *', function() {
   console.log('Clear old trips');
   clearTrips();
   finishTripReminder();
@@ -98,8 +99,8 @@ function clearTrips() {
     .then(trips => {
       if (trips) {
         var oldTrips = trips.toJSON();
-        var oldTripsIds = oldTrips.map(item => item.id)
-        
+        var oldTripsIds = oldTrips.map(item => item.id);
+
         console.log('Removing old trips', oldTripsIds);
 
         oldTrips.forEach(trip => {
@@ -108,18 +109,19 @@ function clearTrips() {
             .ref('server/holding_trips/')
             .child(trip.id)
             .remove();
-          sendPushNotification({ 
+          sendPushNotification({
             token: trip.user.device_id,
             title: 'Lo sentimos',
-            body: 'Tu servicio ha excedido el tiempo de espera'
+            body: 'Tu servicio ha excedido el tiempo de espera',
           });
-        })
+        });
 
         if (oldTripsIds.length > 0) {
           new Trip()
             .query(qb => {
-              qb.whereIn('id', oldTripsIds) 
-            }).save({ status: 'canceled' }, { patch: true});
+              qb.whereIn('id', oldTripsIds);
+            })
+            .save({ status: 'canceled' }, { patch: true });
         }
       }
     });
@@ -135,17 +137,17 @@ function finishTripReminder() {
     .then(trips => {
       if (trips) {
         var oldTrips = trips.toJSON();
-        var oldTripsIds = oldTrips.map(item => item.id)
-        
+        var oldTripsIds = oldTrips.map(item => item.id);
+
         console.log('Sending reminders', oldTripsIds);
 
         oldTrips.forEach(trip => {
-          sendPushNotification({ 
+          sendPushNotification({
             token: trip.driver.user.device_id,
             title: '¿Olvidaste finalizar un servicio?',
-            body: 'Finaliza para ver más servicios'
+            body: 'Finaliza para ver más servicios',
           });
-        })
+        });
       }
     });
 }
@@ -162,23 +164,26 @@ function sendPushNotification(options) {
         ttl: 540000, // 9 minutes
         priority: 'high',
         notification: {
-          sound: 'default'
-        }
+          sound: 'default',
+        },
       },
       apns: {
         payload: {
           aps: {
-            sound: 'default'
-          }
-        }
+            sound: 'default',
+          },
+        },
       },
-      token: options.token
+      token: options.token,
     };
 
-    firebase.messaging().send(message)
-      .then((resp) => {
+    firebase
+      .messaging()
+      .send(message)
+      .then(resp => {
         console.log('Message sent successfully:', resp);
-      }).catch((err) => {
+      })
+      .catch(err => {
         console.log('Failed to send the message:', err);
       });
   }
@@ -186,5 +191,5 @@ function sendPushNotification(options) {
 
 module.exports = {
   app: app,
-  server: server
+  server: server,
 };
