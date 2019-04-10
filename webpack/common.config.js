@@ -35,15 +35,6 @@ module.exports = {
     path: path.join(__dirname, './public/locate'),
     filename: 'index-bundle.js',
   },
-  devServer: {
-    host: '0.0.0.0',
-    hot: true,
-    port: 8080,
-    historyApiFallback: true,
-    proxy: {
-      '/api': 'http://localhost:3000',
-    },
-  },
   module: {
     rules: [
       {
@@ -95,20 +86,19 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: path.join(__dirname, './webapp/public/index.html'),
+      template: path.join(__dirname, '../webapp/public/index.html'),
       inject: true,
       filename: 'index.html',
     }),
-    new HtmlWebpackPrefixPlugin(),
     new MiniCssExtractPlugin({
       filename: '[name].css',
       chunkFilename: '[id].css',
     }),
     new webpack.DefinePlugin({
-        "process.env": {
-          TRACK_APP_BASE_URL: JSON.stringify(process.env.TRACK_APP_BASE_URL),
-          TRACK_APP_MAPS_GEOCODE_KEY: JSON.stringify(process.env.TRACK_APP_MAPS_GEOCODE_KEY),
-        },
+      'process.env': {
+        TRACK_APP_BASE_URL: JSON.stringify(process.env.TRACK_APP_BASE_URL),
+        TRACK_APP_MAPS_GEOCODE_KEY: JSON.stringify(process.env.TRACK_APP_MAPS_GEOCODE_KEY),
+      },
     }),
   ],
   resolve: {

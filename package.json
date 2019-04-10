@@ -6,8 +6,8 @@
     "start": "node ./bin/www",
     "test": "jest",
     "test:ci": "jest --ci --coverage --maxWorkers=2",
-    "dev": "webpack-dev-server --mode development --hot --progress --port 8080 --host 0.0.0.0",
-    "build": "webpack --mode production"
+    "dev": "webpack-dev-server --config webpack/dev.config.js --mode development --hot --progress --port 8080 --host 0.0.0.0",
+    "build": "webpack --mode production --config webpack/prod.config.js"
   },
   "dependencies": {
     "@babel/runtime": "^7.3.4",
@@ -38,7 +38,8 @@
     "socket.io": "^2.1.0",
     "uuid": "^3.3.2",
     "validate.js": "^0.12.0",
-    "wait-on": "^3.1.0"
+    "wait-on": "^3.1.0",
+    "webpack-merge": "^4.2.1"
   },
   "devDependencies": {
     "@babel/core": "^7.2.2",

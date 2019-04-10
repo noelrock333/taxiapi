@@ -3,12 +3,12 @@ import axios from 'axios';
 class Api {
   // Todas las llamadas pasan por aquí
   static xhr = async function(route, params, verb) {
-    const host = `${process.env.TRACK_APP_BASE_URL}/api`;
-    const url = `${host}${route}`;
+    // const host = `${process.env.TRACK_APP_BASE_URL}/api`;
+    const url = `${route}`;
     const options = {
       url: url,
       method: verb,
-      data: params
+      data: params,
     };
     return axios(options);
   };
