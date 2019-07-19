@@ -11,6 +11,8 @@ const Trip = require('../models/trip');
 const BlackList = require('../models/blacklist');
 const firebase = require('../firebase');
 const DriversView = require('../models/drivers_view')
+const fs = require('fs');
+const { upload } = require('../multer');
 
 // User routes
 
@@ -92,21 +94,38 @@ router.get('/drivers', helpers.requireAdminAuthentication, async (req, res, next
 });
 
 router.get('/driver/:id', helpers.requireAdminAuthentication, async (req, res, next) => {
-  const driver_id = req.params.id;
-  const driver = await new Driver({id: driver_id}).fetch();
+  let driver = await new Driver({id: req.params.id}).fetch();
+  driver = driver.toJSON()
+  let user = await new User({id: driver.user_id}).fetch();
+  user = user.toJSON();
+
+  driver.email = user.email
+  driver.full_name = user.full_name
+
   if (driver) {
-    res.status(200).json(driver.toJSON());
+    res.status(200).json(driver);
   }
   else {
     res.status(404).json({errors: ['Este Conductor no existe']});
   }
 });
 
-router.put('/driver/:id', helpers.requireAdminAuthentication, async (req, res, next) => {
+router.put('/driver/:id', helpers.requireAdminAuthentication, upload.single('public_service_permission_image'), async (req, res, next) => {
   const driver_id = req.params.id;
   let driver = await new Driver({id: driver_id}).fetch();
+  let user = await new User({id: driver.toJSON().user_id}).fetch();
+
   if(driver) {
-    driver = await driver.save(req.body, {patch: true});
+    const { phone_number, license_number, email, full_name } = req.body
+    if (req.file){
+      const public_service_permission_image = req.file.path
+      const oldNamePermissionImage = driver.toJSON().public_service_permission_image
+      driver = await driver.save({phone_number, license_number, public_service_permission_image}, {patch: true});
+      fs.unlinkSync(oldNamePermissionImage)
+    }else{
+      driver = await driver.save({phone_number, license_number}, {patch: true});
+    }
+    user = await user.save({email, full_name}, {path: true})
     res.status(200).json(driver.toJSON());
   }
   else {
@@ -149,7 +168,7 @@ router.put('/driver/:id/activate', async (req, res, next) => {
           title: 'Tu cuenta ha sido activada',
           body: 'Ya puedes tomar servicios!!'
         });
-      } 
+      }
       res.status(200).json(driverJSON);
     }
     else {
@@ -182,7 +201,6 @@ router.post('/driver/:id/notify', helpers.requireAdminAuthentication, async (req
 router.get('/drivers-search', helpers.requireAdminAuthentication, async (req, res, next) => {
   const search = `%${req.query.search}%`
   const page = req.query.page;
-  
   DriversView.query(function(qb) {
     qb.where('email', 'ILIKE', search)
       .orWhere('full_name', 'ILIKE', search)
