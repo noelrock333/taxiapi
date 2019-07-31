@@ -13,6 +13,8 @@ const firebase = require('../firebase');
 const DriversView = require('../models/drivers_view')
 const fs = require('fs');
 const { upload } = require('../multer');
+const driverValidation = require('../validations/models/driver');
+const SHA256 = require('crypto-js/sha256');
 
 // User routes
 
@@ -91,6 +93,49 @@ router.get('/drivers', helpers.requireAdminAuthentication, async (req, res, next
   const drivers = await new DriversView().orderBy('id', 'DESC').fetchPage({withRelated: ['vehicle.organization', 'user'], pageSize: 15, page});
   const {pageCount} = drivers.pagination;
   res.status(200).json({drivers: drivers.toJSON(), pageCount});
+});
+
+
+router.post('/new_driver', helpers.requireAdminAuthentication, upload.single('public_service_permission_image'), driverValidation.validate, async (req, res, next) => {
+  const public_service_permission_image = req.file.path
+  const {
+    full_name,
+    email,
+    password,
+    license_number,
+    status = 'free',
+    phone_number,
+  } = req.body;
+
+  let password_hash = SHA256(password).toString();
+
+  let user = await new User({ full_name, email, password_hash }).save();
+  if (user) {
+    let user_id = user.get('id');
+    let driver = await new Driver({
+      license_number,
+      status,
+      user_id,
+      phone_number,
+      public_service_permission_image
+    }).save();
+    if (driver){
+      driver = await driver.fetch({withRelated: ['vehicle', 'user']});
+      driver = driver.toJSON();
+      const token = authToken.encode({
+        id: driver.user.id,
+        driver_id: driver.id,
+        role: 'driver'
+      });
+      res.status(201).json({ jwt: token });
+    }
+    else{
+      user = await new User({id: user_id}).destroy();
+      res.status(422).json({errors: [ 'No se pudo crear el conductor']});
+    }
+  }
+  else
+    res.status(422).json({errors: [ 'No se pudo crear el conductor']});
 });
 
 router.get('/driver/:id', helpers.requireAdminAuthentication, async (req, res, next) => {
