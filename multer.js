@@ -7,10 +7,8 @@ const storage =  multer.diskStorage({
       switch(file.fieldname){
         case 'profile_image':
           return 'driver_profile_images';
-          break;
         case 'public_service_permission_image':
           return 'driver_service_permission_images';
-          break;
       }
     }
     cb(null,`./uploads/${path()}`);
