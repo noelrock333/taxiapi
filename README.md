@@ -12,7 +12,7 @@ Before starting to install dependencies, have to be sure that you already have
 `Postgress 9.x` or higher, has to be up an running, also you'll need to create an
 empty database called `taxidb`.
 
-Another thing is you'll need `node` and `npm` installed in your computer, so, at the
+Another thing is you'll need `node` and `npm` installed in your computer, so, at the
 moment I'm writing this README I have installed `node 10.16.3` and `npm 6.9.0` and
 everything works perfect.
 
