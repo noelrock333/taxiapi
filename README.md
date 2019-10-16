@@ -12,7 +12,7 @@ Before starting to install dependencies, have to be sure that you already have
 `Postgress 9.x` or higher, has to be up an running, also you'll need to create an
 empty database called `taxidb`.
 
-Another thing is you'll need `node` and `npm` installed in your computer, so, at the
+Another thing is you'll need `node` and `npm` installed in your computer, so, at the
 moment I'm writing this README I have installed `node 10.16.3` and `npm 6.9.0` and
 everything works perfect.
 
@@ -32,7 +32,7 @@ knex seed:run
 ```
 ## Usage
 
-IMPORTANT: To run the project properly, has to ask for some environment files as the `.env` and `firebaseconfig.json`, and put it in root project,
+IMPORTANT: To run the project properly, has to ask for some environment files as the `.env` and `firebaseconfig.json`, and put it in root project,
 whitout whis important files, the project just won't run.
 
 If you're ready, run
