@@ -57,15 +57,16 @@ router.post(
           positions: [{ lat: lat_origin, lng: lng_origin }],
           timestamp: new Date(trip.toJSON().created_at).getTime(),
         });
+        
+        // Send push notifications to all active drivers
+        sendNotificationsDrivers(res);
       
         res.status(201).json(trip.toJSON());
-        // Send push notifications to all active drivers
-        sendNotificationsDrivers();
     } else res.status(422).json({ errors: ['No se pudo crear el viaje'] });
   },
 );
 
-async function sendNotificationsDrivers() {
+async function sendNotificationsDrivers(res) {
     new Driver()
       .where({ status: 'free', push_notifications: true })
       .fetchAll({ withRelated: ['user'] })
