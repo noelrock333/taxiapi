@@ -58,7 +58,7 @@ router.post(
           timestamp: new Date(trip.toJSON().created_at).getTime(),
         });
       
-      async () => sendNotificationsDrivers()
+      sendNotificationsDrivers();
       // Send push notifications to all active drivers
       res.status(201).json(trip.toJSON());
     } else res.status(422).json({ errors: ['No se pudo crear el viaje'] });
@@ -66,37 +66,41 @@ router.post(
 );
 
 async function sendNotificationsDrivers() {
-  new Driver()
-    .where({ status: 'free', push_notifications: true })
-    .fetchAll({ withRelated: ['user'] })
-    .then(rows => {
-      if (rows) {
-        let drivers = rows.toJSON();
-        if (Array.isArray(drivers)) {
-          const driversFiltered = drivers.filter(item => item.user.device_id);
-          eachLimit(driversFiltered, 20, function (driver, callback) {
-            console.log('Sending push to driver', driver.id);
-            res.sendPushNotification({
-                token: driver.user.device_id,
-                title: 'Nuevo servicio',
-                body: 'Se ha creado un nuevo servicio',
-            }).then(() => {
-              console.log('Message sent to driver', driver.id);
-              callback();
-            }).catch(err => {
-              console.log('Failed to send message to', { driver_id: driver.id, token: driver.user.device_id })
-              callback();
+  return new Promise((resolve, reject) => {
+    new Driver()
+      .where({ status: 'free', push_notifications: true })
+      .fetchAll({ withRelated: ['user'] })
+      .then(rows => {
+        if (rows) {
+          let drivers = rows.toJSON();
+          if (Array.isArray(drivers)) {
+            const driversFiltered = drivers.filter(item => item.user.device_id);
+            eachLimit(driversFiltered, 20, function (driver, callback) {
+              console.log('Sending push to driver', driver.id);
+              res.sendPushNotification({
+                  token: driver.user.device_id,
+                  title: 'Nuevo servicio',
+                  body: 'Se ha creado un nuevo servicio',
+              }).then(() => {
+                console.log('Message sent to driver', driver.id);
+                callback();
+              }).catch(err => {
+                console.log('Failed to send message to', { driver_id: driver.id, token: driver.user.device_id })
+                callback();
+              });
+            }, function(err) {
+              if(err) {
+                console.log('Failed to send message to', err);
+                reject(err);
+              } else {
+                console.log('All messages sent');
+                resolve();
+              }
             });
-          }, function(err) {
-            if(err) {
-              console.log('Failed to send message to', err);
-            } else {
-              console.log('All messages sent');
-            }
-          });
+          }
         }
-      }
-    });
+      });
+  })
 }
 
 router.get('/traking/:guid', async (req, res, next) => {
