@@ -85,11 +85,11 @@ async function sendNotificationsDrivers() {
               console.log('Message sent to driver', driver.id);
               callback();
             } catch(err) {
-              callback(err);
+              callback({ driver_id: driver.id, token: driver.user.device_id });
             }
           }, function(err) {
             if(err) {
-              console.log(err);
+              console.log('Failed to send message to', err);
             } else {
               console.log('All messages sent');
             }
