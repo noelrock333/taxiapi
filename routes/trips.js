@@ -74,7 +74,7 @@ async function sendNotificationsDrivers() {
         let drivers = rows.toJSON();
         if (Array.isArray(drivers)) {
           const driversFiltered = drivers.filter(item => item.user.device_id);
-          async.eachLimit(driversFiltered, 20, async (driver, callback) => {
+          eachLimit(driversFiltered, 20, async (driver, callback) => {
             console.log('Sending push to driver', driver.id);
             try {
               await res.sendPushNotification({
