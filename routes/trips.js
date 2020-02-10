@@ -58,15 +58,14 @@ router.post(
           timestamp: new Date(trip.toJSON().created_at).getTime(),
         });
       
-      sendNotificationsDrivers();
-      // Send push notifications to all active drivers
-      res.status(201).json(trip.toJSON());
+        res.status(201).json(trip.toJSON());
+        // Send push notifications to all active drivers
+        sendNotificationsDrivers();
     } else res.status(422).json({ errors: ['No se pudo crear el viaje'] });
   },
 );
 
 async function sendNotificationsDrivers() {
-  return new Promise((resolve, reject) => {
     new Driver()
       .where({ status: 'free', push_notifications: true })
       .fetchAll({ withRelated: ['user'] })
@@ -92,20 +91,15 @@ async function sendNotificationsDrivers() {
             }, function(err) {
               if(err) {
                 console.log('Failed to send message to', err);
-                reject(err);
               } else {
                 console.log('All messages sent');
-                resolve();
               }
             });
           }
-        } else {
-          reject({ error: 'No drivers found' });
         }
       }).catch(err => {
-        reject(err);
+        console.log(err);
       });
-  })
 }
 
 router.get('/traking/:guid', async (req, res, next) => {
