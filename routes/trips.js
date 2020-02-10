@@ -7,6 +7,7 @@ const Driver = require('../models/driver');
 const validateTrip = require('../validations/models/trip');
 const firebase = require('../firebase');
 const uuidv1 = require('uuid/v1');
+const eachLimit = require('async/eachLimit');
 
 router.post(
   '/',
@@ -56,33 +57,47 @@ router.post(
           positions: [{ lat: lat_origin, lng: lng_origin }],
           timestamp: new Date(trip.toJSON().created_at).getTime(),
         });
-
+      
+      sendNotificationsDrivers();
       // Send push notifications to all active drivers
-      new Driver()
-        .where({ status: 'free', push_notifications: true })
-        .fetchAll({ withRelated: ['user'] })
-        .then(rows => {
-          if (rows) {
-            let drivers = rows.toJSON();
-            if (Array.isArray(drivers)) {
-              drivers
-                .filter(item => item.user.device_id)
-                .forEach(driver => {
-                  console.log('Push to driver', driver.id);
-                  res.sendPushNotification({
-                    token: driver.user.device_id,
-                    title: 'Nuevo servicio',
-                    body: 'Se ha creado un nuevo servicio',
-                  });
-                });
-            }
-          }
-        });
-
       res.status(201).json(trip.toJSON());
     } else res.status(422).json({ errors: ['No se pudo crear el viaje'] });
   },
 );
+
+async function sendNotificationsDrivers() {
+  new Driver()
+    .where({ status: 'free', push_notifications: true })
+    .fetchAll({ withRelated: ['user'] })
+    .then(rows => {
+      if (rows) {
+        let drivers = rows.toJSON();
+        if (Array.isArray(drivers)) {
+          const driversFiltered = drivers.filter(item => item.user.device_id);
+          async.eachLimit(driversFiltered, 20, async (driver, callback) => {
+            console.log('Sending push to driver', driver.id);
+            try {
+              await res.sendPushNotification({
+                token: driver.user.device_id,
+                title: 'Nuevo servicio',
+                body: 'Se ha creado un nuevo servicio',
+              });
+              console.log('Message sent to driver', driver.id);
+              callback();
+            } catch(err) {
+              callback(err);
+            }
+          }, function(err) {
+            if(err) {
+              console.log(err);
+            } else {
+              console.log('All messages sent');
+            }
+          });
+        }
+      }
+    });
+}
 
 router.get('/traking/:guid', async (req, res, next) => {
   const { guid } = req.params;
