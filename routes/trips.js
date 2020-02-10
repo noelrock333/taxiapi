@@ -85,7 +85,8 @@ async function sendNotificationsDrivers() {
                 console.log('Message sent to driver', driver.id);
                 callback();
               }).catch(err => {
-                console.log('Failed to send message to', { driver_id: driver.id, token: driver.user.device_id })
+                console.log('Failed to send message to', { driver_id: driver.id, token: driver.user.device_id });
+                console.log(err);
                 callback();
               });
             }, function(err) {
@@ -98,7 +99,11 @@ async function sendNotificationsDrivers() {
               }
             });
           }
+        } else {
+          reject({ error: 'No drivers found' });
         }
+      }).catch(err => {
+        reject(err);
       });
   })
 }
