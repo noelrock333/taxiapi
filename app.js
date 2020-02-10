@@ -153,40 +153,46 @@ function finishTripReminder() {
 }
 
 function sendPushNotification(options) {
-  console.log('sendPushNotification');
-  if (options.token && options.title && options.body) {
-    var message = {
-      notification: {
-        title: options.title,
-        body: options.body,
-      },
-      android: {
-        ttl: 540000, // 9 minutes
-        priority: 'high',
+  console.log('Sending Push Notification');
+  return new Promise((resolve, reject) => {
+    if (options.token && options.title && options.body) {
+      var message = {
         notification: {
-          sound: 'default',
+          title: options.title,
+          body: options.body,
         },
-      },
-      apns: {
-        payload: {
-          aps: {
+        android: {
+          ttl: 540000, // 9 minutes
+          priority: 'high',
+          notification: {
             sound: 'default',
           },
         },
-      },
-      token: options.token,
-    };
-
-    firebase
-      .messaging()
-      .send(message)
-      .then(resp => {
-        console.log('Message sent successfully:', resp);
-      })
-      .catch(err => {
-        console.log('Failed to send the message:', err);
-      });
-  }
+        apns: {
+          payload: {
+            aps: {
+              sound: 'default',
+            },
+          },
+        },
+        token: options.token,
+      };
+  
+      firebase
+        .messaging()
+        .send(message)
+        .then(resp => {
+          console.log('Message sent successfully:', resp);
+          return resolve(resp);
+        })
+        .catch(err => {
+          console.log('Failed to send the message:', err);
+          return reject(err);
+        });
+    } else {
+      return reject({ error: 'missing parameter' });
+    }
+  })
 }
 
 module.exports = {
